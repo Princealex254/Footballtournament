@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Prince Alex Digital Football Hub</title>
+    <style>
+        :root {
+            --primary: #c62828;
+            --primary-dark: #8e0000;
+            --bg: #f4f4f4;
+            --white: #ffffff;
+            --text: #333;
+            --gray: #888;
+        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); }
+        
+        /* Layout */
+        header { background: var(--primary); color: var(--white); padding: 1rem; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        h1 { margin: 0; font-size: 1.2rem; }
+        button { cursor: pointer; border: none; border-radius: 4px; padding: 8px 16px; font-weight: bold; transition: 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: #555; color: white; }
+        .btn-danger { background: #d32f2f; color: white; }
+        .btn-nav { background: rgba(255,255,255,0.2); color: white; margin-left: 5px; }
+        .btn-nav:hover { background: rgba(255,255,255,0.4); }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .card { background: var(--white); border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        /* Auth Overlay */
+        #auth-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .login-box { background: white; padding: 2rem; border-radius: 8px; width: 90%; max-width: 400px; text-align: center; }
+        .login-box input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; }
+        
+        /* Dashboard Sections */
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        /* Lists */
+        .item-list { list-style: none; padding: 0; }
+        .item-list li { background: #fafafa; border-bottom: 1px solid #eee; padding: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .item-list li img { height: 30px; width: 30px; object-fit: contain; margin-right: 10px; }
+        
+        /* Modals */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+        .modal.open { display: flex; }
+        .modal-content { background: white; padding: 20px; border-radius: 8px; width: 95%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        
+        /* Scorers Input */
+        .scorer-row { display: flex; gap: 5px; margin-bottom: 5px; }
+        .scorer-row input, .scorer-row select { padding: 5px; border: 1px solid #ccc; border-radius: 4px; height: 36px; background: white; color: #333; }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .btn-nav { font-size: 0.8rem; padding: 5px 10px; }
+        }
+
+        /* Table Styles */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 10px; }
+        th, td { padding: 8px; text-align: center; border-bottom: 1px solid #eee; }
+        th { background: #f9f9f9; color: #666; font-weight: bold; }
+        td:nth-child(2) { text-align: left; }
+        .team-cell { display: flex; align-items: center; }
+        .team-cell img { width: 20px; height: 20px; margin-right: 5px; object-fit: contain; }
+    </style>
+</head>
+<body>
+
+    <!-- Auth Overlay -->
+    <div id="auth-overlay">
+        <div class="login-box">
+            <h2>Admin Login</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button class="btn-primary" style="width:100%" onclick="login()">Login</button>
+            <p id="login-error" style="color: red; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" style="display:none;">
+        
+        <!-- 1. Tournament Selection View -->
+        <div id="view-selection" class="container" style="margin-top:50px; text-align:center;">
+            <h1 id="welcome-msg" style="color:var(--primary);">Welcome Admin</h1>
+            <p>Select a tournament to manage</p>
+            
+            <div class="card" style="max-width:400px; margin:20px auto; cursor:pointer; border:1px solid #ddd; transition:0.2s;" onclick="enterDashboard()">
+                <h2 id="selection-name" style="margin:0; color:var(--text);">Loading...</h2>
+                <small style="color:var(--gray);">Click to Manage</small>
+            </div>
+            
+            <button class="btn-secondary" onclick="openModal('modal-tournament')">Create / Edit Name</button>
+        </div>
+
+        <!-- 2. Management Dashboard View -->
+        <div id="view-dashboard" style="display:none;">
+        <header>
+            <div style="display:flex; align-items:center;">
+                <h1 id="header-title">Prince Alex Hub <small>(Admin)</small></h1>
+                <button onclick="openModal('modal-tournament')" style="background:none; border:1px solid rgba(255,255,255,0.3); border-radius:4px; color:white; cursor:pointer; margin-left:15px; padding:2px 8px; font-size:0.8rem;">✎ Edit</button>
+            </div>
+            <nav>
+                <select id="category-select" onchange="switchCategory(this.value)" style="padding:5px; border-radius:4px; margin-right:10px; border:none; cursor:pointer; font-weight:bold;">
+                    <option value="Men">Men</option>
+                    <option value="Ladies">Ladies</option>
+                </select>
+                <select id="nav-select" onchange="showSection(this.value)" style="padding:5px; border-radius:4px; margin-right:10px; border:none; cursor:pointer; font-weight:bold;">
+                    <option value="groups">Groups</option>
+                    <option value="tables">Tables</option>
+                    <option value="teams">Teams</option>
+                    <option value="matches">Matches</option>
+                    <option value="scorers">Top Scorers</option>
+                </select>
+                <button class="btn-nav" onclick="logout()">Logout</button>
+            </nav>
+        </header>
+
+        <div class="container">
+            <!-- Groups Section -->
+            <div id="groups" class="section active">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2>Groups</h2>
+                        <button class="btn-primary" onclick="prepareGroupModal()">+ Add Group</button>
+                    </div>
+                    <ul id="group-list" class="item-list">Loading...</ul>
+                </div>
+                <div class="card">
+                    <h3>Actions</h3>
+                    <button class="btn-secondary" onclick="generateKnockouts()">Generate Knockout Stage (Top 2)</button>
+                </div>
+            </div>
+
+            <!-- Tables Section -->
+            <div id="tables" class="section">
+                <div id="tables-container">Loading tables...</div>
+            </div>
+
+            <!-- Teams Section -->
+            <div id="teams" class="section">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2>Teams</h2>
+                        <button class="btn-primary" onclick="prepareTeamModal()">+ Add Team</button>
+                    </div>
+                    <ul id="team-list" class="item-list">Loading...</ul>
+                </div>
+            </div>
+
+            <!-- Matches Section -->
+            <div id="matches" class="section">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2>Fixtures & Results</h2>
+                        <button class="btn-primary" onclick="prepareMatchModal()">+ Add Fixture</button>
+                    </div>
+                    <div id="match-list">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Scorers Section -->
+            <div id="scorers" class="section">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h2>Top Scorers</h2>
+                        <button class="btn-primary" onclick="openAddScorerModal()">+ Add Scorer</button>
+                    </div>
+                    <div id="scorers-list">Loading...</div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Tournament Settings Modal -->
+    <div id="modal-tournament" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Tournament Setup</h3><span onclick="closeModal('modal-tournament')" style="cursor:pointer;">✖</span></div>
+            <div class="form-group"><label>Tournament Name</label><input type="text" id="settings-name" placeholder="Enter Tournament Name"></div>
+            <button class="btn-primary" onclick="saveSettings()">Save Name</button>
+        </div>
+    </div>
+
+    <!-- Add Group Modal -->
+    <div id="modal-group" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Add Group</h3><span onclick="closeModal('modal-group')" style="cursor:pointer;">✖</span></div>
+            <input type="hidden" id="group-id">
+            <div class="form-group"><label>Group Name</label><input type="text" id="group-name"></div>
+            <button class="btn-primary" onclick="saveGroup()">Save Group</button>
+        </div>
+    </div>
+
+    <!-- Add Team Modal -->
+    <div id="modal-team" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Add Team</h3><span onclick="closeModal('modal-team')" style="cursor:pointer;">✖</span></div>
+            <input type="hidden" id="team-id">
+            <div class="form-group"><label>Team Name</label><input type="text" id="team-name"></div>
+            <div class="form-group"><label>Group</label><select id="team-group"></select></div>
+            <div class="form-group"><label>Logo (Optional)</label><input type="file" id="team-logo" accept="image/*"></div>
+            <button class="btn-primary" onclick="saveTeam()">Save Team</button>
+        </div>
+    </div>
+
+    <!-- Add Match Modal -->
+    <div id="modal-match" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Add Fixture</h3><span onclick="closeModal('modal-match')" style="cursor:pointer;">✖</span></div>
+            <input type="hidden" id="match-id">
+            <div class="form-group"><label>Group/Stage</label><select id="match-group" onchange="updateMatchTeams()"></select></div>
+            <div class="form-group"><label>Date/Time</label><input type="datetime-local" id="match-date"></div>
+            <div class="form-group"><label>Home Team</label><select id="match-home"></select></div>
+            <div class="form-group"><label>Away Team</label><select id="match-away"></select></div>
+            <button class="btn-primary" onclick="saveMatch()">Create Fixture</button>
+        </div>
+    </div>
+
+    <!-- Edit Result Modal -->
+    <div id="modal-result" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Update Result</h3><span onclick="closeModal('modal-result')" style="cursor:pointer;">✖</span></div>
+            <input type="hidden" id="result-id">
+            <h4 id="result-title" style="text-align:center; margin:0 0 15px 0;"></h4>
+            
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <div class="form-group" style="flex:1">
+                    <label>Home Goals</label>
+                    <input type="number" id="res-home-goals" min="0" value="0">
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label>Away Goals</label>
+                    <input type="number" id="res-away-goals" min="0" value="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Goal Scorers <button type="button" onclick="addScorerRow()" style="font-size:0.8rem; padding:2px 5px;">+ Add</button></label>
+                <div style="display:flex; gap:5px; margin-bottom:5px; font-size:0.8rem; color:#666; font-weight:bold;">
+                    <span style="flex:2">Player Full Name</span>
+                    <span style="flex:1">Team</span>
+                    <span style="width:50px">Goals</span>
+                    <span style="width:30px"></span>
+                </div>
+                <div id="scorers-container"></div>
+                <datalist id="player-list-options"></datalist>
+            </div>
+
+            <button class="btn-primary" onclick="saveResult()">Save Result</button>
+            <button class="btn-danger" onclick="deleteMatch()" style="float:right;">Delete Match</button>
+        </div>
+    </div>
+
+    <!-- Edit Scorer Modal -->
+    <div id="modal-scorer-edit" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Edit Scorer</h3><span onclick="closeModal('modal-scorer-edit')" style="cursor:pointer;">✖</span></div>
+            <input type="hidden" id="edit-scorer-original-name">
+            <input type="hidden" id="edit-scorer-original-team">
+            
+            <div class="form-group">
+                <label>Player Name</label>
+                <input type="text" id="edit-scorer-name">
+            </div>
+            <div class="form-group">
+                <label>Team</label>
+                <select id="edit-scorer-team"></select>
+            </div>
+            
+            <div class="form-group">
+                <label>Goals per Match</label>
+                <div id="edit-scorer-matches" style="max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 10px; border-radius: 4px;"></div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between;">
+                <button class="btn-primary" onclick="saveScorerUpdate()">Update All Entries</button>
+                <button class="btn-danger" onclick="deleteScorer()">Delete Player</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Scorer Modal -->
+    <div id="modal-scorer-add" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Add Scorer</h3><span onclick="closeModal('modal-scorer-add')" style="cursor:pointer;">✖</span></div>
+            
+            <div class="form-group">
+                <label>Team</label>
+                <select id="add-scorer-team"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Player Name</label>
+                <input type="text" id="add-scorer-name" list="player-list-options" placeholder="Type or select name">
+            </div>
+
+            <div class="form-group"><label>Goals</label><input type="number" id="add-scorer-goals" min="1" value="1"></div>
+            <button class="btn-primary" onclick="saveNewScorer()">Add Scorer</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, onSnapshot, where, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCW0BqYOirnrPRkgvSvtSjK2-OGVTa71uQ",
+            authDomain: "princealexdigital-4848c.firebaseapp.com",
+            projectId: "princealexdigital-4848c",
+            storageBucket: "princealexdigital-4848c.firebasestorage.app",
+            messagingSenderId: "1316427677",
+            appId: "1:1316427677:web:21bdffbf2095d1d5064174"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // --- Global State ---
+        let groups = [];
+        let teams = [];
+        let matches = [];
+        let adminName = "Admin";
+        let currentCategory = "Men";
+
+        // --- Auth Logic ---
+        window.login = () => {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, e, p)
+                .catch(err => document.getElementById('login-error').innerText = err.message);
+        };
+
+        window.logout = () => signOut(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Extract name from email
+                const namePart = user.email.split('@')[0];
+                adminName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+                document.getElementById('welcome-msg').innerText = `Welcome, ${adminName}`;
+
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                initTournamentListener();
+            } else {
+                document.getElementById('auth-overlay').style.display = 'flex';
+                document.getElementById('app').style.display = 'none';
+            }
+        });
+
+        // --- Data Listeners ---
+        function initTournamentListener() {
+            // Settings (Tournament Name) - Listen immediately for Selection Screen
+            onSnapshot(doc(db, "meta", "tournament"), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // Update Selection Screen
+                    document.getElementById('selection-name').innerText = data.name || "Unnamed Tournament";
+                    // Update Dashboard Header & Modal Input
+                    document.getElementById('header-title').innerHTML = `${data.name} <small>(${adminName})</small>`;
+                    document.getElementById('settings-name').value = data.name || "";
+                } else {
+                    document.getElementById('selection-name').innerText = "No Tournament Found";
+                    document.getElementById('settings-name').value = "";
+                }
+            });
+        }
+
+        window.enterDashboard = () => {
+            document.getElementById('view-selection').style.display = 'none';
+            document.getElementById('view-dashboard').style.display = 'block';
+            
+            // Groups
+            onSnapshot(query(collection(db, "groups"), orderBy("name")), (snap) => {
+                groups = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                renderGroups();
+                populateDropdowns();
+                renderTables();
+            });
+            // Teams
+            onSnapshot(collection(db, "teams"), (snap) => {
+                teams = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                renderTeams();
+                renderTables();
+                renderMatches();
+                renderScorers();
+            });
+            // Matches
+            onSnapshot(query(collection(db, "matches"), orderBy("date", "desc")), (snap) => {
+                matches = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                renderMatches();
+                renderTables();
+                renderScorers();
+            });
+        };
+
+        window.switchCategory = (val) => {
+            currentCategory = val;
+            renderGroups();
+            renderTeams();
+            renderMatches();
+            populateDropdowns();
+            renderTables();
+            renderScorers();
+        };
+
+        // --- UI Helpers ---
+        window.showSection = (id) => {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(document.getElementById('nav-select')) document.getElementById('nav-select').value = id;
+        };
+        window.openModal = (id) => document.getElementById(id).classList.add('open');
+        window.closeModal = (id) => document.getElementById(id).classList.remove('open');
+
+        // --- Tables Logic ---
+        function renderTables() {
+            const container = document.getElementById('tables-container');
+            container.innerHTML = '';
+
+            const filteredGroups = groups.filter(g => (g.category || 'Men') === currentCategory);
+            
+            if (filteredGroups.length === 0) {
+                container.innerHTML = '<div class="card"><p style="padding:10px; text-align:center;">No groups found for this category.</p></div>';
+                return;
+            }
+
+            filteredGroups.forEach(group => {
+                // Init Stats
+                const groupTeams = teams.filter(t => t.groupId === group.id).map(t => ({
+                    ...t, P:0, W:0, D:0, L:0, F:0, A:0, GD:0, Pts:0
+                }));
+
+                // Process Matches
+                matches.filter(m => m.groupId === group.id && m.played).forEach(m => {
+                    const h = groupTeams.find(t => t.id === m.homeTeam);
+                    const a = groupTeams.find(t => t.id === m.awayTeam);
+                    
+                    if(h && a) {
+                        h.P++; a.P++;
+                        h.F += m.homeGoals; h.A += m.awayGoals;
+                        a.F += m.awayGoals; a.A += m.homeGoals;
+
+                        if(m.homeGoals > m.awayGoals) { h.W++; h.Pts+=3; a.L++; }
+                        else if(m.homeGoals < m.awayGoals) { a.W++; a.Pts+=3; h.L++; }
+                        else { h.D++; a.D++; h.Pts++; a.Pts++; }
+                    }
+                });
+
+                // Calculate GD and Sort
+                groupTeams.forEach(t => t.GD = t.F - t.A);
+                groupTeams.sort((a,b) => b.Pts - a.Pts || b.GD - a.GD || b.F - a.F);
+
+                // Render HTML
+                const rows = groupTeams.map((t, i) => `
+                    <tr>
+                        <td>${i+1}</td>
+                        <td>
+                            <div class="team-cell">
+                                <img src="${t.logo || 'https://via.placeholder.com/20'}" alt="">
+                                ${t.name}
+                            </div>
+                        </td>
+                        <td>${t.P}</td>
+                        <td>${t.W}</td>
+                        <td>${t.D}</td>
+                        <td>${t.L}</td>
+                        <td>${t.F}</td>
+                        <td>${t.A}</td>
+                        <td>${t.GD}</td>
+                        <td><b>${t.Pts}</b></td>
+                    </tr>
+                `).join('');
+
+                const tableHtml = `
+                    <div class="card">
+                        <h3>${group.name}</h3>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Team</th>
+                                        <th>P</th>
+                                        <th>W</th>
+                                        <th>D</th>
+                                        <th>L</th>
+                                        <th>F</th>
+                                        <th>A</th>
+                                        <th>GD</th>
+                                        <th>PTS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${rows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += tableHtml;
+            });
+        }
+
+        // --- Groups Logic ---
+        function renderGroups() {
+            const filteredGroups = groups.filter(g => (g.category || 'Men') === currentCategory);
+            const list = document.getElementById('group-list');
+            list.innerHTML = filteredGroups.map(g => `<li>
+                <b>${g.name}</b>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="prepareGroupModal('${g.id}')">Edit</button>
+                    <button class="btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteGroup('${g.id}')">Delete</button>
+                </div>
+            </li>`).join('');
+        }
+
+        window.prepareGroupModal = (id = null) => {
+            document.getElementById('group-id').value = id || "";
+            document.getElementById('group-name').value = id ? groups.find(g => g.id === id).name : "";
+            document.querySelector('#modal-group h3').innerText = id ? "Edit Group" : "Add Group";
+            openModal('modal-group');
+        };
+
+        window.saveGroup = async () => {
+            const id = document.getElementById('group-id').value;
+            const name = document.getElementById('group-name').value;
+            if(!name) return alert("Name required");
+            
+            if(id) await updateDoc(doc(db, "groups", id), { name });
+            else await addDoc(collection(db, "groups"), { name, category: currentCategory });
+            
+            closeModal('modal-group');
+        };
+
+        window.deleteGroup = async (id) => {
+            if(!confirm("Delete this group?")) return;
+            await deleteDoc(doc(db, "groups", id));
+        };
+
+        // --- Teams Logic ---
+        function renderTeams() {
+            const validGroupIds = groups.filter(g => (g.category || 'Men') === currentCategory).map(g => g.id);
+            const filteredTeams = teams.filter(t => validGroupIds.includes(t.groupId));
+            const list = document.getElementById('team-list');
+            list.innerHTML = filteredTeams.map(t => {
+                const gName = groups.find(g => g.id === t.groupId)?.name || 'Unknown';
+                return `<li>
+                    <div style="display:flex; align-items:center;">
+                        <img src="${t.logo || 'https://via.placeholder.com/30'}" alt="logo">
+                        <span>${t.name}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <small>${gName}</small>
+                        <div style="display:flex; gap:5px;">
+                            <button class="btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="prepareTeamModal('${t.id}')">Edit</button>
+                            <button class="btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteTeam('${t.id}')">Delete</button>
+                        </div>
+                    </div>
+                </li>`;
+            }).join('');
+        }
+
+        function populateDropdowns() {
+            const filteredGroups = groups.filter(g => (g.category || 'Men') === currentCategory);
+            const groupOpts = filteredGroups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+            const knockoutOpts = `
+                <option value="knockout">Knockout Stage</option>
+                <option value="Round of 16">Round of 16</option>
+                <option value="Quarter Final">Quarter Final</option>
+                <option value="Semi Final">Semi Final</option>
+                <option value="Final">Final</option>
+            `;
+            document.getElementById('team-group').innerHTML = groupOpts;
+            document.getElementById('match-group').innerHTML = groupOpts + knockoutOpts;
+            updateMatchTeams();
+        }
+
+        window.prepareTeamModal = (id = null) => {
+            document.getElementById('team-id').value = id || "";
+            document.getElementById('team-logo').value = ""; // Clear file input
+            if(id) {
+                const t = teams.find(x => x.id === id);
+                document.getElementById('team-name').value = t.name;
+                document.getElementById('team-group').value = t.groupId;
+                document.querySelector('#modal-team h3').innerText = "Edit Team";
+            } else {
+                document.getElementById('team-name').value = "";
+                document.querySelector('#modal-team h3').innerText = "Add Team";
+            }
+            openModal('modal-team');
+        };
+
+        window.saveTeam = async () => {
+            const id = document.getElementById('team-id').value;
+            const name = document.getElementById('team-name').value;
+            const groupId = document.getElementById('team-group').value;
+            const file = document.getElementById('team-logo').files[0];
+
+            if(!name) return alert("Name required");
+
+            let logoUrl = null;
+            if (file) {
+                const storageRef = ref(storage, `logos/${Date.now()}_${file.name}`);
+                await uploadBytes(storageRef, file);
+                logoUrl = await getDownloadURL(storageRef);
+            }
+
+            if(id) {
+                const data = { name, groupId };
+                if(logoUrl) data.logo = logoUrl;
+                await updateDoc(doc(db, "teams", id), data);
+            } else {
+                await addDoc(collection(db, "teams"), { name, groupId, logo: logoUrl || "" });
+            }
+            
+            closeModal('modal-team');
+        };
+
+        window.deleteTeam = async (id) => {
+            if(!confirm("Delete this team?")) return;
+            await deleteDoc(doc(db, "teams", id));
+        };
+
+        // --- Matches Logic ---
+        window.updateMatchTeams = () => {
+            const groupId = document.getElementById('match-group').value;
+            let filteredTeams = teams;
+            const isGroup = groups.some(g => g.id === groupId);
+            
+            if(isGroup) {
+                filteredTeams = teams.filter(t => t.groupId === groupId);
+            } else {
+                const validGroupIds = groups.filter(g => (g.category || 'Men') === currentCategory).map(g => g.id);
+                filteredTeams = teams.filter(t => validGroupIds.includes(t.groupId));
+            }
+            const opts = filteredTeams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+            document.getElementById('match-home').innerHTML = opts;
+            document.getElementById('match-away').innerHTML = opts;
+        };
+
+        window.prepareMatchModal = (id = null) => {
+            document.getElementById('match-id').value = id || "";
+            if(id) {
+                const m = matches.find(x => x.id === id);
+                document.getElementById('match-group').value = m.groupId;
+                updateMatchTeams(); // Refresh team lists based on group
+                
+                // Handle Date format (ensure it fits datetime-local)
+                let dVal = m.date;
+                if(dVal.length > 16) dVal = dVal.slice(0, 16); 
+                document.getElementById('match-date').value = dVal;
+                
+                document.getElementById('match-home').value = m.homeTeam;
+                document.getElementById('match-away').value = m.awayTeam;
+                
+                document.querySelector('#modal-match h3').innerText = "Edit Fixture";
+                document.querySelector('#modal-match .btn-primary').innerText = "Save Changes";
+            } else {
+                document.getElementById('match-date').value = "";
+                document.querySelector('#modal-match h3').innerText = "Add Fixture";
+                document.querySelector('#modal-match .btn-primary').innerText = "Create Fixture";
+            }
+            openModal('modal-match');
+        };
+
+        window.saveMatch = async () => {
+            const id = document.getElementById('match-id').value;
+            const groupId = document.getElementById('match-group').value;
+            const homeId = document.getElementById('match-home').value;
+            const awayId = document.getElementById('match-away').value;
+            const date = document.getElementById('match-date').value;
+
+            if(homeId === awayId) return alert("Team cannot play itself");
+            if(!date) return alert("Date required");
+
+            if(id) {
+                await updateDoc(doc(db, "matches", id), {
+                    groupId, homeTeam: homeId, awayTeam: awayId, date
+                });
+            } else {
+                await addDoc(collection(db, "matches"), {
+                    groupId, homeTeam: homeId, awayTeam: awayId, date,
+                    played: false, homeGoals: 0, awayGoals: 0, scorers: [],
+                    category: currentCategory
+                });
+            }
+            closeModal('modal-match');
+        };
+
+        function renderMatches() {
+            const filteredMatches = matches.filter(m => {
+                if (m.category) return m.category === currentCategory;
+                if (m.groupId === 'knockout') return currentCategory === 'Men';
+                const g = groups.find(x => x.id === m.groupId);
+                return (g ? (g.category || 'Men') : 'Men') === currentCategory;
+            });
+            const list = document.getElementById('match-list');
+            list.innerHTML = filteredMatches.map(m => {
+                const h = teams.find(t => t.id === m.homeTeam)?.name || 'Unknown';
+                const a = teams.find(t => t.id === m.awayTeam)?.name || 'Unknown';
+                const gName = groups.find(g => g.id === m.groupId)?.name || (m.groupId === 'knockout' ? 'Knockout' : m.groupId);
+                const status = m.played ? `<span style="color:var(--primary); font-weight:bold;">FT ${m.homeGoals} - ${m.awayGoals}</span>` : 'vs';
+                
+                return `<div class="card" style="border-left: 4px solid var(--primary);">
+                    <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:5px;">
+                        <div style="font-size:0.8rem; color:#666;">${gName} • ${new Date(m.date).toLocaleString()}</div>
+                        <button class="btn-secondary" style="padding:2px 6px; font-size:0.7rem;" onclick="prepareMatchModal('${m.id}')">Edit</button>
+                    </div>
+                    <div style="cursor:pointer; display:flex; justify-content:space-between; font-size:1.1rem;" onclick="openResultModal('${m.id}')">
+                        <span>${h}</span>
+                        <span>${status}</span>
+                        <span>${a}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // --- Scorers Logic ---
+        function renderScorers() {
+            const container = document.getElementById('scorers-list');
+            const scorerMap = {};
+
+            const filteredMatches = matches.filter(m => {
+                if (m.category) return m.category === currentCategory;
+                if (m.groupId === 'knockout') return currentCategory === 'Men';
+                const g = groups.find(x => x.id === m.groupId);
+                return (g ? (g.category || 'Men') : 'Men') === currentCategory;
+            });
+
+            filteredMatches.forEach(m => {
+                if(m.scorers && Array.isArray(m.scorers)) {
+                    m.scorers.forEach(s => {
+                        const key = s.player + '_' + s.team;
+                        if(!scorerMap[key]) scorerMap[key] = { name: s.player, team: s.team, goals: 0 };
+                        scorerMap[key].goals += s.goals;
+                    });
+                }
+            });
+
+            const sortedScorers = Object.values(scorerMap).sort((a,b) => b.goals - a.goals);
+            
+            if(sortedScorers.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#999;">No goals recorded yet.</p>';
+                return;
+            }
+
+            container.innerHTML = `<ul class="item-list">` + sortedScorers.map((s, i) => `
+                <li>
+                    <div style="display:flex; align-items:center;">
+                        <span style="font-weight:bold; width:30px; color:#888;">${i+1}</span>
+                        <span style="font-weight:bold;">${s.name}</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <small>${s.team}</small>
+                        <b style="color:var(--primary); font-size:1.1rem;">${s.goals}</b>
+                        <button class="btn-secondary" style="padding:2px 6px; font-size:0.7rem;" onclick="openScorerModal('${s.name.replace(/'/g, "\\'")}', '${s.team.replace(/'/g, "\\'")}')">Edit</button>
+                    </div>
+                </li>
+            `).join('') + `</ul>`;
+        }
+
+        // --- Results & Scorers ---
+        let currentMatchId = null;
+
+        window.openResultModal = (matchId) => {
+            currentMatchId = matchId;
+            const m = matches.find(x => x.id === matchId);
+            
+            // Safe access to teams (prevents crash if team deleted) & Set Global BEFORE rendering rows
+            const h = teams.find(t => t.id === m.homeTeam) || { name: "Home Team" };
+            const a = teams.find(t => t.id === m.awayTeam) || { name: "Away Team" };
+            window.currentMatchTeams = [h, a];
+
+            document.getElementById('result-id').value = matchId;
+            document.getElementById('result-title').innerText = `${h.name} vs ${a.name}`;
+            document.getElementById('res-home-goals').value = m.homeGoals || 0;
+            document.getElementById('res-away-goals').value = m.awayGoals || 0;
+
+            // Populate Datalist for Player Autocomplete
+            const allPlayers = new Set();
+            matches.forEach(match => {
+                if(match.scorers) match.scorers.forEach(s => allPlayers.add(s.player));
+            });
+            document.getElementById('player-list-options').innerHTML = Array.from(allPlayers).sort().map(p => `<option value="${p}">${p}</option>`).join('');
+
+            // Populate Scorers
+            const container = document.getElementById('scorers-container');
+            container.innerHTML = '';
+            if(m.scorers) {
+                m.scorers.forEach(s => addScorerRow(s.player, s.team, s.goals));
+            }
+
+            openModal('modal-result');
+        };
+
+        window.addScorerRow = (player='', teamId='', goals=1) => {
+            const div = document.createElement('div');
+            div.className = 'scorer-row';
+            
+            const currentTeams = (window.currentMatchTeams && window.currentMatchTeams.length) ? window.currentMatchTeams : [{name:'Home'}, {name:'Away'}];
+            
+            // Handle case where stored team name doesn't match current team names (e.g. name changed)
+            let dropdownTeams = [...currentTeams];
+            if (teamId && !dropdownTeams.some(t => t.name === teamId)) {
+                dropdownTeams.push({ name: teamId });
+            }
+
+            const teamOpts = dropdownTeams.map(t => `<option value="${t.name}" ${t.name === teamId ? 'selected' : ''}>${t.name}</option>`).join('');
+            
+            div.innerHTML = `
+                <input type="text" list="player-list-options" placeholder="Type Name..." value="${player}" class="scorer-name" style="flex:2">
+                <select class="scorer-team" style="flex:1; cursor:pointer;">${teamOpts}</select>
+                <input type="number" value="${goals}" min="1" class="scorer-goals" style="width:50px">
+                <button type="button" onclick="this.parentElement.remove()" class="btn-danger">x</button>
+            `;
+            document.getElementById('scorers-container').appendChild(div);
+        };
+
+        window.saveResult = async () => {
+            const matchId = document.getElementById('result-id').value;
+            const homeGoals = parseInt(document.getElementById('res-home-goals').value);
+            const awayGoals = parseInt(document.getElementById('res-away-goals').value);
+            
+            // Collect Scorers
+            const scorers = [];
+            let totalScored = 0;
+            document.querySelectorAll('.scorer-row').forEach(row => {
+                const player = row.querySelector('.scorer-name').value.trim();
+                const team = row.querySelector('.scorer-team').value;
+                const goals = parseInt(row.querySelector('.scorer-goals').value);
+                if(player && goals > 0) {
+                    scorers.push({ player, team, goals });
+                    totalScored += goals;
+                }
+            });
+
+            if(totalScored > (homeGoals + awayGoals)) {
+                if(!confirm("Warning: Total scorer goals exceed match score. Save anyway?")) return;
+            }
+
+            await updateDoc(doc(db, "matches", matchId), {
+                played: true,
+                homeGoals,
+                awayGoals,
+                scorers
+            });
+            closeModal('modal-result');
+        };
+
+        window.deleteMatch = async () => {
+            if(confirm("Delete this match permanently?")) {
+                await deleteDoc(doc(db, "matches", currentMatchId));
+                closeModal('modal-result');
+            }
+        };
+
+        // --- Knockout Generation ---
+        window.generateKnockouts = async () => {
+            if(!confirm("Generate Knockout Matches (Top 2 from each group)?")) return;
+            
+            // Calculate standings locally to find top 2
+            const standings = {}; // { groupId: [ { teamId, pts, gd, gf } ] }
+            const categoryGroups = groups.filter(g => (g.category || 'Men') === currentCategory);
+            const categoryGroupIds = categoryGroups.map(g => g.id);
+            
+            // Init standings
+            teams.filter(t => categoryGroupIds.includes(t.groupId)).forEach(t => {
+                if(!standings[t.groupId]) standings[t.groupId] = [];
+                standings[t.groupId].push({ ...t, pts: 0, gd: 0, gf: 0 });
+            });
+
+            // Process played matches
+            matches.filter(m => m.played && m.groupId !== 'knockout' && categoryGroupIds.includes(m.groupId)).forEach(m => {
+                const h = m.homeTeam;
+                const a = m.awayTeam;
+                const hg = m.homeGoals;
+                const ag = m.awayGoals;
+                
+                // Helper to update stats
+                const update = (tid, pts, gd, gf) => {
+                    for(let g in standings) {
+                        const t = standings[g].find(x => x.id === tid);
+                        if(t) { t.pts += pts; t.gd += gd; t.gf += gf; }
+                    }
+                };
+
+                if(hg > ag) { update(h, 3, hg-ag, hg); update(a, 0, ag-hg, ag); }
+                else if(hg < ag) { update(h, 0, hg-ag, hg); update(a, 3, ag-hg, ag); }
+                else { update(h, 1, 0, hg); update(a, 1, 0, ag); }
+            });
+
+            // Sort and pick top 2
+            const qualified = [];
+            for(let gId in standings) {
+                standings[gId].sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+                if(standings[gId].length >= 2) {
+                    qualified.push(standings[gId][0]); // 1st
+                    qualified.push(standings[gId][1]); // 2nd
+                }
+            }
+
+            if(qualified.length < 2) return alert("Not enough teams/groups to generate knockouts.");
+
+            // Simple pairing logic: 1st vs 2nd from different groups if possible, else sequential
+            // This is a basic implementation. Real world logic depends on exact group count (e.g. A1 vs B2).
+            // We will just pair them up sequentially for the demo.
+            
+            const batch = [];
+            for(let i=0; i<qualified.length; i+=2) {
+                if(i+1 < qualified.length) {
+                    await addDoc(collection(db, "matches"), {
+                        groupId: "knockout",
+                        homeTeam: qualified[i].id,
+                        awayTeam: qualified[i+1].id,
+                        date: new Date().toISOString(),
+                        played: false, homeGoals: 0, awayGoals: 0, scorers: [],
+                        category: currentCategory
+                    });
+                }
+            }
+            alert("Knockout fixtures generated!");
+        };
+
+        // --- Scorer Editing Logic ---
+        window.openScorerModal = (name, team) => {
+            document.getElementById('edit-scorer-original-name').value = name;
+            document.getElementById('edit-scorer-original-team').value = team;
+            document.getElementById('edit-scorer-name').value = name;
+            
+            // Populate Team Dropdown
+            const teamOpts = teams.map(t => `<option value="${t.name}" ${t.name === team ? 'selected' : ''}>${t.name}</option>`).join('');
+            document.getElementById('edit-scorer-team').innerHTML = teamOpts;
+
+            // Find matches where this player scored for this team
+            const playerMatches = matches.filter(m => m.scorers && m.scorers.some(s => s.player === name && s.team === team));
+            
+            const container = document.getElementById('edit-scorer-matches');
+            container.innerHTML = playerMatches.map(m => {
+                const scorerEntry = m.scorers.find(s => s.player === name && s.team === team);
+                // Find opponent name
+                const myTeamId = teams.find(t => t.name === team)?.id;
+                const opponentId = (m.homeTeam === myTeamId) ? m.awayTeam : m.homeTeam;
+                const opponent = teams.find(t => t.id === opponentId)?.name || 'Opponent';
+                const date = new Date(m.date).toLocaleDateString();
+                
+                return `
+                    <div class="scorer-match-row" style="display:flex; align-items:center; margin-bottom:10px; gap:10px;" data-match-id="${m.id}">
+                        <div style="flex:1; font-size:0.85rem;">
+                            <div>vs ${opponent}</div>
+                            <div style="color:#888; font-size:0.75rem;">${date}</div>
+                        </div>
+                        <input type="number" class="edit-match-goals" value="${scorerEntry.goals}" min="0" style="width:60px; padding:5px; border:1px solid #ccc; border-radius:4px;">
+                    </div>
+                `;
+            }).join('');
+
+            openModal('modal-scorer-edit');
+        };
+
+        window.saveScorerUpdate = async () => {
+            const oldName = document.getElementById('edit-scorer-original-name').value;
+            const oldTeam = document.getElementById('edit-scorer-original-team').value;
+            const newName = document.getElementById('edit-scorer-name').value;
+            const newTeam = document.getElementById('edit-scorer-team').value;
+            
+            const rows = document.querySelectorAll('.scorer-match-row');
+            for (const row of rows) {
+                const matchId = row.dataset.matchId;
+                const newGoals = parseInt(row.querySelector('.edit-match-goals').value);
+                const m = matches.find(x => x.id === matchId);
+                if (!m) continue;
+                
+                let newScorers = [...m.scorers];
+                if (newGoals > 0) {
+                    newScorers = newScorers.map(s => (s.player === oldName && s.team === oldTeam) ? { ...s, player: newName, team: newTeam, goals: newGoals } : s);
+                } else {
+                    // Remove entry if goals set to 0
+                    newScorers = newScorers.filter(s => !(s.player === oldName && s.team === oldTeam));
+                }
+                
+                await updateDoc(doc(db, "matches", matchId), { scorers: newScorers });
+            }
+            closeModal('modal-scorer-edit');
+        };
+
+        window.deleteScorer = async () => {
+            if(!confirm("Remove this player from ALL matches?")) return;
+            const name = document.getElementById('edit-scorer-original-name').value;
+            const team = document.getElementById('edit-scorer-original-team').value;
+            
+            const playerMatches = matches.filter(m => m.scorers && m.scorers.some(s => s.player === name && s.team === team));
+            for (const m of playerMatches) {
+                const newScorers = m.scorers.filter(s => !(s.player === name && s.team === team));
+                await updateDoc(doc(db, "matches", m.id), { scorers: newScorers });
+            }
+            closeModal('modal-scorer-edit');
+        };
+
+        // --- Add Scorer Logic ---
+        window.openAddScorerModal = () => {
+            // Populate Teams
+            const teamOpts = teams.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+            document.getElementById('add-scorer-team').innerHTML = '<option value="">Select Team</option>' + teamOpts;
+            document.getElementById('add-scorer-name').value = "";
+            document.getElementById('add-scorer-goals').value = "1";
+            
+            // Populate Datalist for Player Autocomplete
+            const allPlayers = new Set();
+            matches.forEach(match => {
+                if(match.scorers) match.scorers.forEach(s => allPlayers.add(s.player));
+            });
+            const datalist = document.getElementById('player-list-options');
+            if(datalist) datalist.innerHTML = Array.from(allPlayers).sort().map(p => `<option value="${p}">${p}</option>`).join('');
+
+            openModal('modal-scorer-add');
+        };
+
+        window.saveNewScorer = async () => {
+            const teamId = document.getElementById('add-scorer-team').value;
+            const player = document.getElementById('add-scorer-name').value.trim();
+            const goals = parseInt(document.getElementById('add-scorer-goals').value);
+
+            if(!teamId || !player || goals < 1) return alert("Please fill all fields correctly.");
+
+            // Automatically find the latest match for this team to attach the scorer to
+            const teamMatches = matches.filter(m => m.homeTeam === teamId || m.awayTeam === teamId)
+                                       .sort((a,b) => new Date(b.date) - new Date(a.date));
+            
+            if (teamMatches.length === 0) return alert("This team has no matches. Create a fixture first to add scorers.");
+            
+            const m = teamMatches[0];
+            const matchId = m.id;
+            const teamName = teams.find(t => t.id === teamId)?.name || "Unknown";
+            let newScorers = [...(m.scorers || [])];
+            const existingIndex = newScorers.findIndex(s => s.player === player && s.team === teamName);
+            if(existingIndex >= 0) newScorers[existingIndex].goals += goals;
+            else newScorers.push({ player, team: teamName, goals });
+            await updateDoc(doc(db, "matches", matchId), { scorers: newScorers });
+            closeModal('modal-scorer-add');
+        };
+
+        // --- Settings Logic ---
+        window.saveSettings = async () => {
+            const name = document.getElementById('settings-name').value;
+            try {
+                await setDoc(doc(db, "meta", "tournament"), { name }, { merge: true });
+                alert("Settings saved!");
+                closeModal('modal-tournament');
+            } catch (error) {
+                console.error("Error saving settings:", error);
+                alert("Error: " + error.message + "\nCheck Firestore Rules.");
+            }
+        };
+    </script>
+</body>
+</html>

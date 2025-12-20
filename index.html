@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prince Alex Digital Football Hub</title>
+    <style>
+        :root {
+            --primary: #c62828;
+            --bg: #f0f2f5;
+            --white: #ffffff;
+            --text: #1a1a1a;
+        }
+        * { box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 60px; }
+
+        /* Header */
+        header { background: var(--primary); color: white; padding: 1rem; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+        h1 { margin: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        .tagline { font-size: 0.8rem; opacity: 0.9; margin-top: 5px; }
+
+        /* Navigation */
+        .nav-tabs { display: flex; justify-content: center; background: white; padding: 10px 0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: sticky; top: 130px; z-index: 90; }
+        .tab { padding: 8px 16px; margin: 0 5px; border: none; background: none; font-weight: bold; color: #666; cursor: pointer; border-radius: 20px; transition: 0.3s; }
+        .tab.active { background: var(--primary); color: white; }
+
+        /* Container */
+        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+        .section { display: none; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards */
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card-header { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; font-weight: bold; color: var(--primary); text-transform: uppercase; font-size: 0.9rem; }
+
+        /* Tables */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 350px; }
+        th { text-align: left; color: #888; font-weight: normal; padding: 8px; border-bottom: 1px solid #eee; }
+        td { padding: 10px 8px; border-bottom: 1px solid #f9f9f9; }
+        tr:last-child td { border-bottom: none; }
+        .team-cell { display: flex; align-items: center; font-weight: 500; }
+        .team-cell img { width: 24px; height: 24px; margin-right: 10px; object-fit: contain; }
+        .num { text-align: center; width: 30px; }
+        .pts { font-weight: bold; color: var(--primary); }
+
+        /* Matches */
+        .match-card { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .match-card:last-child { border-bottom: none; }
+        .match-team { flex: 1; display: flex; align-items: center; font-size: 0.95rem; }
+        .match-team.away { justify-content: flex-end; }
+        .match-team img { width: 25px; height: 25px; object-fit: contain; }
+        .match-score { background: #eee; padding: 5px 12px; border-radius: 15px; font-weight: bold; font-size: 0.9rem; margin: 0 10px; min-width: 60px; text-align: center; }
+        .match-date { font-size: 0.7rem; color: #999; text-align: center; margin-bottom: 4px; }
+        .match-center { display: flex; flex-direction: column; align-items: center; }
+
+        /* Scorers */
+        .scorer-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .scorer-rank { width: 30px; font-weight: bold; color: #ccc; font-size: 1.2rem; }
+        .scorer-info { flex: 1; }
+        .scorer-name { font-weight: bold; display: block; }
+        .scorer-team { font-size: 0.8rem; color: #888; }
+        .scorer-goals { font-size: 1.2rem; font-weight: bold; color: var(--primary); }
+
+        /* Bracket (Simple List View for Mobile) */
+        .bracket-stage { margin-bottom: 20px; }
+        .bracket-stage h3 { font-size: 1rem; text-align: center; background: #333; color: white; padding: 5px; border-radius: 4px; margin-bottom: 10px; }
+
+        /* Mobile Tweaks */
+        @media (max-width: 400px) {
+            .tab { padding: 8px 10px; font-size: 0.85rem; }
+            h1 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Prince Alex Hub</h1>
+        <div class="tagline">Live Tables • Fixtures • Results • Top Scorers</div>
+        <div style="margin-top: 10px;">
+            <select id="category-select" onchange="switchCategory(this.value)" style="padding: 5px 10px; border-radius: 20px; border: none; font-weight: bold; color: var(--primary); background: white; cursor: pointer;">
+                <option value="Men">Men's Tournament</option>
+                <option value="Ladies">Ladies Tournament</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="nav-tabs">
+        <button class="tab active" onclick="switchTab('tables')">Tables</button>
+        <button class="tab" onclick="switchTab('matches')">Matches</button>
+        <button class="tab" onclick="switchTab('scorers')">Top Scorers</button>
+        <button class="tab" onclick="switchTab('knockout')">Knockout</button>
+    </div>
+
+    <div class="container">
+        
+        <!-- TABLES SECTION -->
+        <div id="tables" class="section active">
+            <div id="tables-container">Loading tables...</div>
+        </div>
+
+        <!-- MATCHES SECTION -->
+        <div id="matches" class="section">
+            <div class="card">
+                <div class="card-header">Latest Results & Fixtures</div>
+                <div id="matches-container">Loading fixtures...</div>
+            </div>
+        </div>
+
+        <!-- SCORERS SECTION -->
+        <div id="scorers" class="section">
+            <div class="card">
+                <div class="card-header">Golden Boot Race</div>
+                <div id="scorers-container">Loading scorers...</div>
+            </div>
+        </div>
+
+        <!-- KNOCKOUT SECTION -->
+        <div id="knockout" class="section">
+            <div id="knockout-container">Waiting for knockout stage...</div>
+        </div>
+
+    </div>
+
+    <footer style="text-align: center; padding: 20px; font-size: 0.9rem; color: #555; margin-top: 20px; background: #fff; border-top: 1px solid #eee; box-shadow: 0 -2px 5px rgba(0,0,0,0.05);">
+        Designed by <a href="https://www.princealex.pro" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: bold;">Prince Alex Digital</a>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCW0BqYOirnrPRkgvSvtSjK2-OGVTa71uQ",
+            authDomain: "princealexdigital-4848c.firebaseapp.com",
+            projectId: "princealexdigital-4848c",
+            storageBucket: "princealexdigital-4848c.firebasestorage.app",
+            messagingSenderId: "1316427677",
+            appId: "1:1316427677:web:21bdffbf2095d1d5064174"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // State
+        let groups = [];
+        let teams = [];
+        let matches = [];
+        let currentCategory = "Men";
+
+        // Listeners
+        onSnapshot(collection(db, "groups"), (snap) => {
+            groups = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            tryRender();
+        }, (error) => console.error("Error loading groups:", error));
+
+        onSnapshot(collection(db, "teams"), (snap) => {
+            teams = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            tryRender();
+        }, (error) => console.error("Error loading teams:", error));
+
+        onSnapshot(query(collection(db, "matches"), orderBy("date", "desc")), (snap) => {
+            matches = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            tryRender();
+        }, (error) => console.error("Error loading matches:", error));
+
+        // Settings Listener
+        onSnapshot(doc(db, "meta", "tournament"), (docSnap) => {
+            if (docSnap.exists()) {
+                const name = docSnap.data().name;
+                document.querySelector('header h1').innerText = name;
+                document.title = name;
+            }
+        }, (error) => console.error("Error loading settings:", error));
+
+        window.switchCategory = (val) => {
+            currentCategory = val;
+            tryRender();
+        };
+
+        function tryRender() {
+            if(groups.length && teams.length) {
+                calculateAndRenderTables();
+                renderMatches();
+                calculateAndRenderScorers();
+                renderKnockouts();
+            }
+        }
+
+        function isMatchInCategory(m) {
+            if (m.category) return m.category === currentCategory;
+            if (!groups.some(g => g.id === m.groupId)) return currentCategory === 'Men'; // Assume all non-group matches are Men unless specified
+            const g = groups.find(x => x.id === m.groupId);
+            return (g ? (g.category || 'Men') : 'Men') === currentCategory;
+        }
+
+        // --- 1. Tables Calculation ---
+        function calculateAndRenderTables() {
+            const container = document.getElementById('tables-container');
+            container.innerHTML = '';
+
+            const filteredGroups = groups.filter(g => (g.category || 'Men') === currentCategory);
+            filteredGroups.sort((a,b) => a.name.localeCompare(b.name)).forEach(group => {
+                // Init Stats
+                const groupTeams = teams.filter(t => t.groupId === group.id).map(t => ({
+                    ...t, P:0, W:0, D:0, L:0, F:0, A:0, GD:0, Pts:0
+                }));
+
+                // Process Matches
+                matches.filter(m => m.groupId === group.id && m.played).forEach(m => {
+                    const h = groupTeams.find(t => t.id === m.homeTeam);
+                    const a = groupTeams.find(t => t.id === m.awayTeam);
+                    
+                    if(h && a) {
+                        h.P++; a.P++;
+                        h.F += m.homeGoals; h.A += m.awayGoals;
+                        a.F += m.awayGoals; a.A += m.homeGoals;
+
+                        if(m.homeGoals > m.awayGoals) { h.W++; h.Pts+=3; a.L++; }
+                        else if(m.homeGoals < m.awayGoals) { a.W++; a.Pts+=3; h.L++; }
+                        else { h.D++; a.D++; h.Pts++; a.Pts++; }
+                    }
+                });
+
+                // Calculate GD and Sort
+                groupTeams.forEach(t => t.GD = t.F - t.A);
+                groupTeams.sort((a,b) => b.Pts - a.Pts || b.GD - a.GD || b.F - a.F);
+
+                // Render HTML
+                const rows = groupTeams.map((t, i) => `
+                    <tr>
+                        <td class="num">${i+1}</td>
+                        <td class="team-cell">
+                            <img src="${t.logo || 'https://via.placeholder.com/20'}" alt="">
+                            ${t.name}
+                        </td>
+                        <td class="num">${t.P}</td>
+                        <td class="num">${t.W}</td>
+                        <td class="num">${t.D}</td>
+                        <td class="num">${t.L}</td>
+                        <td class="num">${t.F}</td>
+                        <td class="num">${t.A}</td>
+                        <td class="num">${t.GD}</td>
+                        <td class="num pts">${t.Pts}</td>
+                    </tr>
+                `).join('');
+
+                const tableHtml = `
+                    <div class="card">
+                        <div class="card-header">${group.name}</div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th class="num">#</th>
+                                        <th>Team</th>
+                                        <th class="num">P</th>
+                                        <th class="num">W</th>
+                                        <th class="num">D</th>
+                                        <th class="num">L</th>
+                                        <th class="num">F</th>
+                                        <th class="num">A</th>
+                                        <th class="num">GD</th>
+                                        <th class="num">Pts</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${rows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += tableHtml;
+            });
+        }
+
+        // --- 2. Matches Render ---
+        function renderMatches() {
+            const container = document.getElementById('matches-container');
+            const groupMatches = matches.filter(m => isMatchInCategory(m));
+            
+            if(groupMatches.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#999;">No matches scheduled.</p>';
+                return;
+            }
+
+            container.innerHTML = groupMatches.map(m => {
+                const h = teams.find(t => t.id === m.homeTeam);
+                const a = teams.find(t => t.id === m.awayTeam);
+                if(!h || !a) return '';
+
+                const date = new Date(m.date);
+                const dateStr = date.toLocaleDateString([], {weekday: 'short', month: 'numeric', day: 'numeric'}) + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const score = m.played ? `FT ${m.homeGoals} - ${m.awayGoals}` : 'vs';
+                const scoreClass = m.played ? 'match-score' : 'match-score'; // can add style diff if needed
+                
+                const group = groups.find(g => g.id === m.groupId);
+                const stageName = group ? group.name : (m.groupId === 'knockout' ? 'Knockout Stage' : m.groupId);
+
+                return `
+                    <div class="match-card">
+                        <div class="match-team">
+                            <img src="${h.logo}" style="margin-right:8px;"> ${h.name}
+                        </div>
+                        <div class="match-center">
+                            <div style="font-size:0.7rem; font-weight:bold; color:var(--primary); text-transform:uppercase; margin-bottom:2px;">${stageName}</div>
+                            <div class="match-date">${dateStr}</div>
+                            <div class="${scoreClass}">${score}</div>
+                        </div>
+                        <div class="match-team away">
+                            ${a.name} <img src="${a.logo}" style="margin-left:8px;">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- 3. Top Scorers ---
+        function calculateAndRenderScorers() {
+            const scorerMap = {};
+
+            matches.filter(m => isMatchInCategory(m)).forEach(m => {
+                if(m.scorers && Array.isArray(m.scorers)) {
+                    m.scorers.forEach(s => {
+                        const key = s.player + '_' + s.team;
+                        if(!scorerMap[key]) scorerMap[key] = { name: s.player, team: s.team, goals: 0 };
+                        scorerMap[key].goals += s.goals;
+                    });
+                }
+            });
+
+            const sortedScorers = Object.values(scorerMap).sort((a,b) => b.goals - a.goals);
+            const container = document.getElementById('scorers-container');
+            
+            if(sortedScorers.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color:#999;">No goals recorded yet.</p>';
+                return;
+            }
+
+            const header = `
+                <div class="scorer-item" style="border-bottom: 2px solid #eee; padding-bottom: 5px; margin-bottom: 5px;">
+                    <div class="scorer-rank" style="font-size: 0.8rem; color: #888;">#</div>
+                    <div class="scorer-info" style="font-size: 0.8rem; color: #888; font-weight: bold;">PLAYER</div>
+                    <div class="scorer-goals" style="font-size: 0.8rem; color: #888;">GOALS</div>
+                </div>`;
+
+            container.innerHTML = header + sortedScorers.map((s, i) => `
+                <div class="scorer-item">
+                    <div class="scorer-rank">${i+1}</div>
+                    <div class="scorer-info">
+                        <span class="scorer-name">${s.name}</span>
+                        <span class="scorer-team">${s.team}</span>
+                    </div>
+                    <div class="scorer-goals">${s.goals}</div>
+                </div>
+            `).join('');
+        }
+
+        // --- 4. Knockout Bracket ---
+        function renderKnockouts() {
+            const container = document.getElementById('knockout-container');
+            const kMatches = matches.filter(m => !groups.some(g => g.id === m.groupId) && isMatchInCategory(m)).reverse(); // Show oldest (first created) first usually, or reverse for latest
+
+            if(kMatches.length === 0) {
+                container.innerHTML = '<div class="card"><p style="text-align:center; padding:20px; color:#999;">Knockout stage has not started.</p></div>';
+                return;
+            }
+
+            const html = kMatches.map(m => {
+                const h = teams.find(t => t.id === m.homeTeam);
+                const a = teams.find(t => t.id === m.awayTeam);
+                if(!h || !a) return '';
+                
+                const score = m.played ? `FT ${m.homeGoals} - ${m.awayGoals}` : 'vs';
+                const stageName = m.groupId === 'knockout' ? 'Knockout' : m.groupId;
+
+                return `
+                    <div class="match-card">
+                        <div class="match-team">
+                            <img src="${h.logo}" style="margin-right:8px;"> ${h.name}
+                        </div>
+                        <div class="match-center">
+                            <div style="font-size:0.7rem; color:#888; margin-bottom:2px;">${stageName}</div>
+                            <div class="match-score" style="background:#333; color:white;">${score}</div>
+                        </div>
+                        <div class="match-team away">
+                            ${a.name} <img src="${a.logo}" style="margin-left:8px;">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div class="card"><div class="card-header">Knockout Fixtures</div>${html}</div>`;
+        }
+
+        // --- Tab Logic ---
+        window.switchTab = (id) => {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            // Find button with onclick matching id and add active
+            const tabs = document.getElementsByClassName('tab');
+            for(let t of tabs) {
+                if(t.getAttribute('onclick').includes(id)) t.classList.add('active');
+            }
+        };
+    </script>
+</body>
+</html>
