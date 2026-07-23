@@ -285,76 +285,25 @@
         .promo-link-icon {
             font-size: 1.1rem;
         }
-
-        footer { text-align: center; padding: 32px 20px; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
-        footer a { color: var(--primary); text-decoration: none; font-weight: 700; }
-
-        /* Competition Selector */
-        #competition-selector-overlay {
-            position: fixed;
-            inset: 0;
-            background: var(--background);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .selector-box {
-            background: var(--surface);
-            padding: 32px;
-            border-radius: var(--radius);
-            width: 100%;
-            max-width: 600px;
-            margin-top: 5vh;
-            text-align: center;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-        }
-        .selector-box h2 {
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 24px;
-        }
-        .selector-footer {
+        .promo-footer {
             margin-top: 20px;
             padding-top: 16px;
-            border-top: 1px solid var(--border);
+            border-top: 1px solid rgba(255,255,255,0.15);
             font-size: 0.75rem;
-            color: var(--text-muted);
+            color: #94a3b8;
             font-weight: 500;
         }
-        .selector-footer a {
+        .promo-footer a {
             color: var(--primary);
             text-decoration: none;
             font-weight: 700;
         }
-        #competition-search {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            margin-bottom: 16px;
-            font-size: 1rem;
-        }
-        #competition-list {
-            max-height: 50vh;
-            overflow-y: auto;
-            text-align: left;
-        }
-        .competition-item {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: background 0.2s;
-            font-weight: 600;
-        }
-        .competition-item:hover {
-            background: var(--surface-alt);
-        }
-        .competition-item:last-child {
-            border-bottom: none;
+
+        footer { text-align: center; padding: 32px 20px; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+        footer a { color: var(--primary); text-decoration: none; font-weight: 700; }
+
+        #no-competition-page {
+            display: none;
         }
 
         @media (max-width: 540px) {
@@ -388,31 +337,26 @@
         </div>
     </header>
 
-    <div id="competition-selector-overlay">
-        <div class="selector-box">
-            <h2>Select a Competition</h2>
-            <input type="text" id="competition-search" placeholder="Search for a competition...">
-            <div id="competition-list"></div>
-            <div class="promo-banner" style="margin-top: 24px;">
-                <div class="promo-content">
-                    <div class="promo-icon">🏆</div>
-                    <h3>Showcase Your Tournament With Us!</h3>
-                    <p>Get your competition live on this platform — real-time standings, fixtures, results & top scorers.</p>
-                    <div class="promo-contacts">
-                        <a href="mailto:princealexdigital@gmail.com" class="promo-link">
-                            <span class="promo-link-icon">✉</span> princealexdigital@gmail.com
-                        </a>
-                        <a href="tel:+254717384875" class="promo-link">
-                            <span class="promo-link-icon">📞</span> 0717 384 875
-                        </a>
-                        <a href="https://www.princealex.digital" target="_blank" class="promo-link">
-                            <span class="promo-link-icon">🌐</span> www.princealex.digital
-                        </a>
-                    </div>
+    <div id="no-competition-page">
+        <div class="promo-banner">
+            <div class="promo-content">
+                <div class="promo-icon">🏆</div>
+                <h3>Showcase Your Tournament With Us!</h3>
+                <p>Get your competition live on this platform — real-time standings, fixtures, results & top scorers.</p>
+                <div class="promo-contacts">
+                    <a href="mailto:princealexdigital@gmail.com" class="promo-link">
+                        <span class="promo-link-icon">✉</span> princealexdigital@gmail.com
+                    </a>
+                    <a href="tel:+254717384875" class="promo-link">
+                        <span class="promo-link-icon">📞</span> 0717 384 875
+                    </a>
+                    <a href="https://www.princealex.digital" target="_blank" class="promo-link">
+                        <span class="promo-link-icon">🌐</span> www.princealex.digital
+                    </a>
                 </div>
-            </div>
-            <div class="selector-footer">
-                You need your tournament here? Call <a href="tel:+254717384875">0717 384 875</a> or <a href="https://www.princealex.digital" target="_blank">Prince Alex Digital</a>
+                <div class="promo-footer">
+                    You need your tournament here? Call <a href="tel:+254717384875">0717 384 875</a> or <a href="https://www.princealex.digital" target="_blank">Prince Alex Digital</a>
+                </div>
             </div>
         </div>
     </div>
@@ -499,11 +443,10 @@
         const db = getFirestore(app);
 
         if (!competitionId) {
-            document.getElementById('competition-selector-overlay').style.display = 'flex';
+            document.getElementById('no-competition-page').style.display = 'block';
             document.querySelector('header').style.display = 'none';
             document.getElementById('main-content').style.display = 'none';
             document.getElementById('main-content-container').style.display = 'none';
-            loadAllCompetitions();
         } else {
             document.getElementById('main-content').style.display = 'flex';
             document.getElementById('main-content-container').style.display = 'block';
@@ -579,11 +522,11 @@
 
         function sanitize(str) {
             if (!str) return '';
-            var amp = String.fromCharCode(38) + String.fromCharCode(97) + String.fromCharCode(109) + String.fromCharCode(112) + String.fromCharCode(59);
-            var lt = String.fromCharCode(38) + String.fromCharCode(108) + String.fromCharCode(116) + String.fromCharCode(59);
-            var gt = String.fromCharCode(38) + String.fromCharCode(103) + String.fromCharCode(116) + String.fromCharCode(59);
-            var quot = String.fromCharCode(38) + String.fromCharCode(113) + String.fromCharCode(117) + String.fromCharCode(111) + String.fromCharCode(116) + String.fromCharCode(59);
-            var apos = String.fromCharCode(38) + String.fromCharCode(35) + String.fromCharCode(51) + String.fromCharCode(57) + String.fromCharCode(59);
+            var amp = String.fromCharCode(38, 97, 109, 112, 59);
+            var lt = String.fromCharCode(38, 108, 116, 59);
+            var gt = String.fromCharCode(38, 103, 116, 59);
+            var quot = String.fromCharCode(38, 113, 117, 111, 116, 59);
+            var apos = String.fromCharCode(38, 35, 51, 57, 59);
             return str.toString().replace(/&/g, amp).replace(/</g, lt).replace(/>/g, gt).replace(/"/g, quot).replace(/'/g, apos);
         }
 
