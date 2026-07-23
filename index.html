@@ -201,14 +201,6 @@
         }
         .gold-goal { color: #b8860b !important; }
 
-        #error-container { 
-            display: none; text-align: center; padding: 100px 20px; 
-            background: var(--surface); border-radius: var(--radius); max-width: 500px;
-            margin: 40px auto; border: 1px solid var(--border);
-        }
-        #error-container h2 { color: var(--text-dark); margin-bottom: 12px; }
-        #error-container p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem; }
-
         #inactive-container {
             display: none; text-align: center; padding: 100px 20px;
             max-width: 500px; margin: 40px auto;
@@ -271,11 +263,6 @@
 
     <div id="no-competition-page">
         <p>You need your tournament here? Call <a href="tel:+254717384875">0717 384 875</a> or <a href="https://www.princealex.digital" target="_blank">Prince Alex Digital</a></p>
-    </div>
-
-    <div id="error-container">
-        <h2>No Competition Selected</h2>
-        <p>This link requires a competition ID. Please use the full link provided by the tournament administrator.</p>
     </div>
 
     <div id="inactive-container">
@@ -363,54 +350,6 @@
             document.getElementById('main-content').style.display = 'flex';
             document.getElementById('main-content-container').style.display = 'block';
             initialDataLoad();
-        }
-
-        async function loadAllCompetitions() {
-            const listContainer = document.getElementById('competition-list');
-            listContainer.innerHTML = '<p style="padding: 20px; text-align: center;">Loading competitions...</p>';
-            try {
-                const competitionsRef = collection(db, "competitions");
-                const q = query(competitionsRef, where("status", "==", "active"), orderBy("createdAt", "desc"));
-                const snapshot = await getDocs(q);
-                const competitions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderCompetitionList(competitions);
-            } catch (error) {
-                listContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--accent);">Could not load competitions.</p>';
-                console.error("Error loading competitions:", error);
-            }
-        }
-
-        function renderCompetitionList(competitions) {
-            const listContainer = document.getElementById('competition-list');
-            const searchInput = document.getElementById('competition-search');
-
-            function filterAndRender() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const filtered = competitions.filter(c => c.name.toLowerCase().includes(searchTerm));
-
-                if (filtered.length === 0) {
-                    listContainer.innerHTML = '<p style="padding: 20px; text-align: center; color: var(--text-muted);">No matching competitions found.</p>';
-                    return;
-                }
-
-                listContainer.innerHTML = filtered.map(c => `
-                    <div class="competition-item" data-id="${c.id}">
-                        ${sanitize(c.name)}
-                    </div>
-                `).join('');
-            }
-
-            searchInput.addEventListener('input', filterAndRender);
-
-            listContainer.addEventListener('click', (e) => {
-                const item = e.target.closest('.competition-item');
-                if (item) {
-                    const id = item.dataset.id;
-                    window.location.href = `index.html?c=${id}`;
-                }
-            });
-
-            filterAndRender();
         }
 
         document.getElementById('share-btn').addEventListener('click', () => {
