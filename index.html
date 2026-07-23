@@ -215,95 +215,27 @@
         }
         #inactive-container h2 { font-size: 1.5rem; color: var(--text-muted); }
 
-        /* Promo Banner */
-        .promo-banner {
-            background: linear-gradient(135deg, #1a1a2e 0%, #2a2a4a 50%, #1a1a3e 100%);
-            color: var(--text-light);
-            margin: 32px auto;
-            max-width: 800px;
-            padding: 0 16px;
-            border-radius: var(--radius);
-            position: relative;
-            overflow: hidden;
-        }
-        .promo-banner::before {
-            content: '';
-            position: absolute; top: 0; left: 0; right: 0; height: 3px;
-            background: var(--gold-gradient);
-        }
-        .promo-content {
-            padding: 32px 24px;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-        .promo-icon {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-        }
-        .promo-content h3 {
-            font-size: 1.15rem;
-            font-weight: 800;
-            margin-bottom: 8px;
-            background: var(--gold-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .promo-content p {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            font-weight: 500;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        .promo-contacts {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 12px;
-        }
-        .promo-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
-            padding: 10px 18px;
-            border-radius: 12px;
-            color: #e2e8f0;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.8rem;
-            transition: 0.2s;
-        }
-        .promo-link:hover {
-            background: rgba(255,255,255,0.15);
-            border-color: var(--primary);
-            transform: translateY(-1px);
-        }
-        .promo-link-icon {
-            font-size: 1.1rem;
-        }
-        .promo-footer {
-            margin-top: 20px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255,255,255,0.15);
-            font-size: 0.75rem;
-            color: #94a3b8;
-            font-weight: 500;
-        }
-        .promo-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 700;
-        }
-
         footer { text-align: center; padding: 32px 20px; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
         footer a { color: var(--primary); text-decoration: none; font-weight: 700; }
 
         #no-competition-page {
             display: none;
+            text-align: center;
+            padding: 120px 20px;
+        }
+        #no-competition-page p {
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 600;
+            line-height: 1.6;
+        }
+        #no-competition-page a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+        #no-competition-page a:hover {
+            text-decoration: underline;
         }
 
         @media (max-width: 540px) {
@@ -338,27 +270,7 @@
     </header>
 
     <div id="no-competition-page">
-        <div class="promo-banner">
-            <div class="promo-content">
-                <div class="promo-icon">🏆</div>
-                <h3>Showcase Your Tournament With Us!</h3>
-                <p>Get your competition live on this platform — real-time standings, fixtures, results & top scorers.</p>
-                <div class="promo-contacts">
-                    <a href="mailto:princealexdigital@gmail.com" class="promo-link">
-                        <span class="promo-link-icon">✉</span> princealexdigital@gmail.com
-                    </a>
-                    <a href="tel:+254717384875" class="promo-link">
-                        <span class="promo-link-icon">📞</span> 0717 384 875
-                    </a>
-                    <a href="https://www.princealex.digital" target="_blank" class="promo-link">
-                        <span class="promo-link-icon">🌐</span> www.princealex.digital
-                    </a>
-                </div>
-                <div class="promo-footer">
-                    You need your tournament here? Call <a href="tel:+254717384875">0717 384 875</a> or <a href="https://www.princealex.digital" target="_blank">Prince Alex Digital</a>
-                </div>
-            </div>
-        </div>
+        <p>You need your tournament here? Call <a href="tel:+254717384875">0717 384 875</a> or <a href="https://www.princealex.digital" target="_blank">Prince Alex Digital</a></p>
     </div>
 
     <div id="error-container">
