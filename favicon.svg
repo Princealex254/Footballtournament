@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Tournament">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe259"/>
+      <stop offset="0.5" stop-color="#daa520"/>
+      <stop offset="1" stop-color="#b8860b"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="#0f0f1a"/>
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#b8860b" stroke-opacity="0.35" stroke-width="2"/>
+  <path d="M14 24c-8 1-9 12 0 13" fill="none" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M50 24c8 1 9 12 0 13" fill="none" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M18 18h28l-2.5 22c0 8-23 8-23 0z" fill="url(#g)"/>
+  <rect x="18" y="16" width="28" height="5" rx="2.5" fill="url(#g)"/>
+  <rect x="29" y="40" width="6" height="10" fill="url(#g)"/>
+  <rect x="21" y="50" width="22" height="4" rx="2" fill="url(#g)"/>
+</svg>
