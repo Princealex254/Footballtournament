@@ -403,6 +403,15 @@
             animation: rotation 1s linear infinite;
         }
         @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .btn-spinner {
+            width: 14px; height: 14px; margin-right: 6px;
+            border: 2px solid rgba(255,255,255,0.45);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: rotation 0.7s linear infinite;
+            display: inline-block; vertical-align: middle;
+        }
+        button.busy { cursor: progress; }
 
             /* Toast */
             #toast-container { top: 12px; right: 12px; left: 12px; max-width: none; }
@@ -607,7 +616,7 @@
                 <!-- Section: Activity Log (Owner Only) -->
                 <div id="activity-log" class="section">
                     <div class="page-header">
-                        <div class="page-title"><h2>Activity Log</h2><p>Track all admin actions across your competitions</p></div>
+                        <div class="page-title"><h2>Activity Log</h2><p>All admin activity across every tournament</p></div>
                         <button class="btn-secondary btn-sm" onclick="clearActivityLog()">Clear Log</button>
                     </div>
                     <div class="card">
@@ -880,11 +889,11 @@
 
             <div class="phase-row">
                 <span class="phase-label">Match Phase (overrides auto clock)</span>
-                <button type="button" class="phase-btn" data-phase="auto" onclick="setMatchPhase('auto')">Auto</button>
-                <button type="button" class="phase-btn" data-phase="1H" onclick="setMatchPhase('1H')">1st Half</button>
-                <button type="button" class="phase-btn" data-phase="HT" onclick="setMatchPhase('HT')">Half Time</button>
-                <button type="button" class="phase-btn" data-phase="2H" onclick="setMatchPhase('2H')">2nd Half</button>
-                <button type="button" class="phase-btn" data-phase="FT" onclick="setMatchPhase('FT')">Full Time</button>
+                <button type="button" class="phase-btn" data-phase="auto" onclick="setMatchPhase('auto', this)">Auto</button>
+                <button type="button" class="phase-btn" data-phase="1H" onclick="setMatchPhase('1H', this)">1st Half</button>
+                <button type="button" class="phase-btn" data-phase="HT" onclick="setMatchPhase('HT', this)">Half Time</button>
+                <button type="button" class="phase-btn" data-phase="2H" onclick="setMatchPhase('2H', this)">2nd Half</button>
+                <button type="button" class="phase-btn" data-phase="FT" onclick="setMatchPhase('FT', this)">Full Time</button>
             </div>
 
             <div class="form-group">
@@ -894,9 +903,9 @@
             </div>
 
             <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button class="btn-secondary" style="flex: 1.5;" onclick="saveMatchUpdate(false)">Update Live Score</button>
-                <button class="btn-primary" style="flex: 2;" onclick="saveMatchUpdate(true)">Confirm & Publish Final Result</button>
-                <button class="btn-danger" style="flex: 1;" onclick="deleteMatch()">Delete Match</button>
+                <button class="btn-secondary" style="flex: 1.5;" onclick="saveMatchUpdate(false, this)">Update Live Score</button>
+                <button class="btn-primary" style="flex: 2;" onclick="saveMatchUpdate(true, this)">Confirm & Publish Final Result</button>
+                <button class="btn-danger" style="flex: 1;" onclick="deleteMatch(this)">Delete Match</button>
             </div>
         </div>
     </div>
@@ -961,6 +970,7 @@
         let allCompetitions = [];
         let allAdmins = [];
         let activeCompetitionId = null;
+        let activeCompetitionName = '';
         let groups = [];
         let teams = [];
         let matches = [];
@@ -974,6 +984,22 @@
         }
         function hideSpinner() {
             document.getElementById('spinner-overlay').style.display = 'none';
+        }
+
+        // Show a small inline spinner + disabled state on the clicked button while an action runs.
+        function setButtonBusy(btn, busy, text) {
+            if (!btn) return;
+            if (busy) {
+                if (btn.dataset.busyLabel === undefined) btn.dataset.busyLabel = btn.textContent;
+                btn.disabled = true;
+                btn.classList.add('busy');
+                btn.innerHTML = '<span class="btn-spinner"></span>' + (text || 'Saving…');
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('busy');
+                const orig = btn.dataset.busyLabel;
+                if (orig !== undefined) { btn.textContent = orig; delete btn.dataset.busyLabel; }
+            }
         }
 
 
@@ -1157,10 +1183,10 @@
             try {
                 if (id) {
                     await updateDoc(doc(db, "competitions", id), { name, category });
-                    // logActivity is called from within the dashboard, not here.
+                    logActivity('Competition Updated', name);
                 } else {
                     await addDoc(collection(db, "competitions"), { name, category, createdAt: new Date(), status: 'active' });
-                    // logActivity is not available here, but it's a minor action.
+                    logActivity('Competition Created', name);
                 }
                 await delay(500);
                 showToast('Competition saved', 'success');
@@ -1221,6 +1247,7 @@
 
         window.openCompetition = (compId, compName) => {
             activeCompetitionId = compId;
+            activeCompetitionName = compName || '';
             document.getElementById('view-selector').style.display = 'none';
             document.getElementById('view-dashboard').style.display = 'flex';
             document.getElementById('dashboard-title').innerText = compName;
@@ -1262,6 +1289,7 @@
 
         window.backToSelector = () => {
             activeCompetitionId = null;
+            activeCompetitionName = '';
             document.getElementById('view-selector').style.display = 'flex';
             document.getElementById('view-dashboard').style.display = 'none';
             // Clean up listeners by re-rendering
@@ -1305,10 +1333,24 @@
                 executePipelineMatrixRender();
             });
 
-            // Real-time listener for activity logs (owner only)
-            onSnapshot(query(collection(db, "activity_logs"), where("competitionId", "==", compId), orderBy("timestamp", "desc")), (snap) => {
-                activityLogs = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            // Real-time listener for activity logs (owner only).
+            // Fetches ALL logs (across every competition) and sorts client-side,
+            // so the owner sees activity from all tournaments. No Firestore index needed.
+            onSnapshot(collection(db, "activity_logs"), (snap) => {
+                const tOf = (v) => { const d = v && typeof v.toDate === 'function' ? v.toDate() : new Date(v); return (d && !isNaN(d.getTime())) ? d.getTime() : 0; };
+                activityLogs = snap.docs.map(d => ({id: d.id, ...d.data()}))
+                    .sort((a, b) => tOf(b.timestamp) - tOf(a.timestamp));
                 executePipelineMatrixRender();
+                renderActivityLog();
+            }, (err) => {
+                console.error('Activity log sync error: ', err);
+                // One-time fallback load via getDocs if the listener failed.
+                getDocs(collection(db, "activity_logs")).then((snap) => {
+                    const tOf = (v) => { const d = v && typeof v.toDate === 'function' ? v.toDate() : new Date(v); return (d && !isNaN(d.getTime())) ? d.getTime() : 0; };
+                    activityLogs = snap.docs.map(d => ({id: d.id, ...d.data()}))
+                        .sort((a, b) => tOf(b.timestamp) - tOf(a.timestamp));
+                    renderActivityLog();
+                });
             });
         }
 
@@ -1358,6 +1400,7 @@
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             btn.classList.add('active');
+            if (id === 'activity-log') renderActivityLog();
         };
         window.openModal = (id) => document.getElementById(id).classList.add('open');
         window.closeModal = (id) => document.getElementById(id).classList.remove('open');
@@ -1416,6 +1459,26 @@
         };
 
         // Tables
+
+        function admAutoExpired(m) {
+            if (m.played || (m.phase && m.phase !== 'auto')) return false;
+            const d = new Date(m.date);
+            return !isNaN(d.getTime()) && new Date() > new Date(d.getTime() + 2 * 60 * 60 * 1000);
+        }
+        function isAdmFinished(m) {
+            return !!(m.played || m.phase === 'FT' || admAutoExpired(m));
+        }
+        function admIsLive(m) {
+            if (m.played) return false;
+            const ph = m.phase || 'auto';
+            if (ph === 'FT') return false;
+            if (ph === '1H' || ph === '2H' || ph === 'HT') return true;
+            const d = new Date(m.date);
+            if (isNaN(d.getTime())) return false;
+            const now = new Date();
+            return now > d && now < new Date(d.getTime() + 2 * 60 * 60 * 1000);
+        }
+
         function renderTables() {
             const container = document.getElementById('tables-container');
             container.innerHTML = '';
@@ -1424,13 +1487,15 @@
 
             filtered.forEach(group => {
                 const gt = teams.filter(t => t.groupId === group.id).map(t => ({...t, P:0, W:0, D:0, L:0, F:0, A:0, GD:0, Pts:0}));
-                matches.filter(m => m.groupId === group.id && m.played).forEach(m => {
+                matches.filter(m => m.groupId === group.id && (isAdmFinished(m) || admIsLive(m))).forEach(m => {
                     const h = gt.find(t => t.id === m.homeTeam);
                     const a = gt.find(t => t.id === m.awayTeam);
                     if (h && a) {
-                        h.P++; a.P++; h.F += m.homeGoals; h.A += m.awayGoals; a.F += m.awayGoals; a.A += m.homeGoals;
-                        if (m.homeGoals > m.awayGoals) { h.W++; h.Pts+=3; a.L++; }
-                        else if (m.homeGoals < m.awayGoals) { a.W++; a.Pts+=3; h.L++; }
+                        const hg = m.homeGoals !== undefined ? m.homeGoals : 0;
+                        const ag = m.awayGoals !== undefined ? m.awayGoals : 0;
+                        h.P++; a.P++; h.F += hg; h.A += ag; a.F += ag; a.A += hg;
+                        if (hg > ag) { h.W++; h.Pts+=3; a.L++; }
+                        else if (hg < ag) { a.W++; a.Pts+=3; h.L++; }
                         else { h.D++; a.D++; h.Pts++; a.Pts++; }
                     }
                 });
@@ -1679,10 +1744,11 @@
             });
         }
 
-        window.setMatchPhase = async (phase) => {
+        window.setMatchPhase = async (phase, btn) => {
             const matchId = document.getElementById('result-id').value;
             if (!matchId) return;
             showSpinner();
+            setButtonBusy(btn, true, 'Saving…');
             try {
                 await updateDoc(compDoc("matches/" + matchId), { phase, phaseSetAt: phase === 'auto' ? null : new Date() });
                 await delay(300);
@@ -1695,6 +1761,7 @@
             } catch(err) {
                 showToast('Error: ' + err.message, 'error');
             } finally {
+                setButtonBusy(btn, false);
                 hideSpinner();
             }
         };
@@ -1791,7 +1858,7 @@
             document.getElementById('scorers-container').appendChild(div);
         };
 
-        window.saveMatchUpdate = async (isFinal) => {
+        window.saveMatchUpdate = async (isFinal, btn) => {
             const matchId = document.getElementById('result-id').value;
             const hg = parseInt(document.getElementById('res-home-goals').value);
             const ag = parseInt(document.getElementById('res-away-goals').value);
@@ -1808,6 +1875,7 @@
                 }
             });
             showSpinner();
+            setButtonBusy(btn, true, isFinal ? 'Publishing…' : 'Saving…');
             try {
                 const dataToUpdate = { homeGoals: hg, awayGoals: ag, scorers, played: isFinal };
                 await updateDoc(compDoc("matches/" + matchId), dataToUpdate);
@@ -1829,6 +1897,7 @@
             } catch(err) {
                 showToast('Error: ' + err.message, 'error');
             } finally {
+                setButtonBusy(btn, false);
                 hideSpinner();
             }
         };
@@ -1845,11 +1914,12 @@
             updateResultMinute();
         }
 
-        window.deleteMatch = async () => {
+        window.deleteMatch = async (btn) => {
             const id = document.getElementById('result-id').value;
             if (currentUserRole !== 'owner') return showToast('Only owner can delete', 'error');
             if (confirm('Delete this match?')) { 
                 showSpinner();
+                setButtonBusy(btn, true, 'Deleting…');
                 try {
                     await deleteDoc(compDoc("matches/" + id)); 
                     logActivity('Match Deleted', `Match ID: ${id}`);
@@ -2024,14 +2094,14 @@
         // ============ ACTIVITY LOG (OWNER ONLY) ============
 
         async function logActivity(action, details) {
-            if (currentUserRole !== 'owner') return;
+            if (!currentUser) return; // Audit all admins (not just owners)
             const log = {
                 action,
                 details,
-                user: currentUser.email,
-                timestamp: new Date(), // Firestore will convert this to its Timestamp type
+                user: currentUser.email || 'unknown',
+                timestamp: new Date(),
                 competitionId: activeCompetitionId,
-                competitionName: allCompetitions.find(c => c.id === activeCompetitionId)?.name || 'Unknown'
+                competitionName: activeCompetitionName || (allCompetitions.find(c => c.id === activeCompetitionId)?.name || 'Unknown')
             };
             try {
                 await addDoc(collection(db, "activity_logs"), log);
@@ -2048,31 +2118,34 @@
                 return;
             }
             container.innerHTML = activityLogs.map(log => {
-                const time = new Date(log.timestamp).toLocaleString();
-                const comp = log.competitionName;
+                const ts = log.timestamp;
+                const dt = ts && typeof ts.toDate === 'function' ? ts.toDate() : new Date(ts);
+                const time = (dt && !isNaN(dt.getTime())) ? dt.toLocaleString() : 'Unknown time';
+                const comp = log.competitionName || 'Unknown';
+                const user = (log.user || 'unknown').split('@')[0];
                 return `<div style="padding:12px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
                     <div style="flex:1;">
                         <div style="font-weight:700; color:var(--text-main); margin-bottom:4px;">${sanitize(log.action)}</div>
                         <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:2px;">${sanitize(log.details)}</div>
                         <div style="font-size:0.75rem; color:var(--text-muted);">${sanitize(comp)} • ${sanitize(time)}</div>
                     </div>
-                    <div style="font-size:0.7rem; font-weight:700; color:var(--primary); background:var(--primary-light); padding:2px 8px; border-radius:6px; white-space:nowrap;">${sanitize(log.user.split('@')[0])}</div>
+                    <div style="font-size:0.7rem; font-weight:700; color:var(--primary); background:var(--primary-light); padding:2px 8px; border-radius:6px; white-space:nowrap;">${sanitize(user)}</div>
                 </div>`;
             }).join('');
         }
 
         window.clearActivityLog = async () => {
-            if (!confirm('Clear all activity logs?')) return;
+            if (!confirm('Clear ALL activity logs across every tournament? This cannot be undone.')) return;
             showSpinner();
             try {
                 const batch = writeBatch(db);
-                const logsToDelete = activityLogs.filter(log => log.competitionId === activeCompetitionId);
+                const logsToDelete = activityLogs; // clear the full (all tournaments) log
                 logsToDelete.forEach(log => {
                     batch.delete(doc(db, "activity_logs", log.id));
                 });
                 await batch.commit();
                 await delay(500);
-                showToast('Activity log cleared', 'info');
+                showToast('All activity logs cleared', 'info');
             } catch (err) {
                 showToast('Error clearing log: ' + err.message, 'error');
             } finally {
@@ -2133,6 +2206,7 @@
                     uid: uid
                 });
                 await delay(500);
+                logActivity('Admin Added', email);
                 showToast('Admin account created successfully', 'success');
                 closeModal('modal-add-admin');
             } catch (err) { 
@@ -2158,8 +2232,10 @@
             showSpinner();
             const assigned = Array.from(document.querySelectorAll('#edit-admin-competition-checkboxes input:checked')).map(cb => cb.value);
             try {
+                const targetEmail = allAdmins.find(a => a.uid === uid)?.email || uid;
                 await updateDoc(doc(db, "admins", uid), { assignedCompetitions: assigned });
                 await delay(500);
+                logActivity('Admin Assignments Updated', targetEmail);
                 showToast('Assignments updated', 'success');
                 closeModal('modal-edit-admin');
             } catch(err) {
@@ -2174,8 +2250,10 @@
             if (!confirm('Remove this admin?')) return;
             showSpinner();
             try {
+                const targetEmail = allAdmins.find(a => a.uid === uid)?.email || uid;
                 await deleteDoc(doc(db, "admins", uid));
                 await delay(500);
+                logActivity('Admin Removed', targetEmail);
                 showToast('Admin removed', 'info');
                 closeModal('modal-edit-admin');
             } catch(err) {
