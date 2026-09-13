@@ -513,79 +513,143 @@
         .snapshot-btn.copied { background: #10b981; border-color: #10b981; color: white; }
 
         /* ----- Landing / Advert page (no competition code) ----- */
+        html { scroll-behavior: smooth; }
         #no-competition-page {
             display: none;
             min-height: 100vh;
             background: linear-gradient(180deg, var(--background) 0%, #1a1a3e 55%, #291f08 130%);
             color: var(--text-light);
-            padding: 0 0 40px;
+            padding: 0 0 48px;
             position: relative;
             overflow: hidden;
         }
         #no-competition-page::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-            background: var(--gold-gradient); z-index: 2;
+            background: var(--gold-gradient); z-index: 20;
         }
         #no-competition-page::after {
             content: ''; position: absolute; top: -20%; left: 50%; transform: translateX(-50%);
             width: 140%; height: 60%;
-            background: radial-gradient(circle at 50% 0%, rgba(255,215,0,0.14), transparent 65%);
+            background: radial-gradient(circle at 50% 0%, rgba(255,215,0,0.12), transparent 65%);
             pointer-events: none;
         }
-        .lp-wrap { max-width: 640px; margin: 0 auto; padding: 48px 20px 0; position: relative; z-index: 1; text-align: center; }
-        .lp-logo {
-            width: 84px; height: 84px; margin: 0 auto 18px; border-radius: 22px;
-            background: var(--dark-card); border: 2px solid var(--primary);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2.4rem; box-shadow: 0 0 0 6px rgba(184,134,11,0.12), 0 0 30px rgba(218,165,32,0.4);
-            animation: lpFloat 3.5s ease-in-out infinite;
+
+        /* ---------- Navigation ---------- */
+        .lp-nav {
+            position: sticky; top: 0; z-index: 10;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px; max-width: 1100px; margin: 0 auto;
+            background: rgba(15,15,26,0.94); backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
         }
-        @keyframes lpFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .lp-brand { font-size: 0.72rem; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;
-            color: #94a3b8; margin-bottom: 10px; }
-        #no-competition-page h1 {
-            font-size: 2rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.15;
+        .lp-nav-brand { font-size: 1.05rem; font-weight: 800; color: #fff; letter-spacing: -0.3px; text-decoration: none; }
+        .lp-nav-brand span { color: #ffd700; }
+        .lp-nav-links { display: flex; align-items: center; gap: 4px; }
+        .lp-nav-links a { color: #cbd5e1; text-decoration: none; font-size: 0.84rem; font-weight: 600; padding: 7px 10px; border-radius: 8px; transition: 0.15s; }
+        .lp-nav-links a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+        .lp-nav-cta { display: inline-flex; align-items: center; gap: 8px; background: #25d366; color: #052e16; text-decoration: none; font-weight: 800; font-size: 0.84rem; padding: 9px 18px; border-radius: 24px; box-shadow: 0 4px 14px rgba(37,211,102,0.3); }
+
+        /* ---------- Hero ---------- */
+        .lp-hero { max-width: 980px; margin: 0 auto; text-align: center; padding: 66px 20px 10px; position: relative; z-index: 1; }
+        .lp-overline { display: inline-block; font-size: 0.72rem; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: #94a3b8; margin-bottom: 18px; }
+        .lp-hero h1 {
+            font-size: 2.7rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1.12;
             background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
-        #no-competition-page h1 span { display: block; }
-        .lp-sub { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; margin: 14px auto 26px; max-width: 460px; }
-        .lp-cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 34px; }
-        .lp-btn {
-            display: inline-flex; align-items: center; gap: 9px; text-decoration: none;
-            padding: 13px 24px; border-radius: 30px; font-weight: 800; font-size: 0.9rem;
-            transition: 0.25s; cursor: pointer; border: none;
-        }
+        .lp-hero p { font-size: 1.05rem; color: #cbd5e1; line-height: 1.6; margin: 20px auto 0; max-width: 560px; }
+        .lp-hero .lp-quote { font-size: 1.15rem; color: #e2e8f0; line-height: 1.6; margin: 30px auto 0; max-width: 640px; }
+
+        /* ---------- Call to action ---------- */
+        .lp-cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 26px; }
+        .lp-btn { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; padding: 14px 26px; border-radius: 30px; font-weight: 800; font-size: 0.92rem; transition: 0.25s; cursor: pointer; border: none; }
         .lp-btn.wa { background: #25d366; color: #052e16; box-shadow: 0 6px 20px rgba(37,211,102,0.35); }
         .lp-btn.wa:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(37,211,102,0.45); }
-        .lp-btn.call { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.25); }
-        .lp-btn.call:hover { background: rgba(255,255,255,0.16); transform: translateY(-2px); }
-        .lp-features {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        .lp-btn.outline { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.25); }
+        .lp-btn.outline:hover { background: rgba(255,255,255,0.16); transform: translateY(-2px); }
+        .lp-hero-note { font-size: 0.84rem; color: #cbd5e1; text-align: center; margin-top: 6px; }
+        .lp-hero-note a { color: #cbd5e1; text-decoration: underline; font-weight: 700; }
+
+        /* ---------- Live dashboard visual ---------- */
+        .lp-dashboard {
+            max-width: 880px; margin: 36px auto 0; text-align: left;
+            background: linear-gradient(145deg, #151526, #20203c);
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 20px;
+            box-shadow: 0 20px 44px rgba(15,23,42,0.45); overflow: hidden;
+        }
+        .lp-dash-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .lp-dash-head .t { font-size: 0.85rem; font-weight: 800; color: #fff; }
+        .lp-live-chip { background: var(--accent); color: #fff; font-size: 0.68rem; font-weight: 800; letter-spacing: 1.2px; padding: 3px 11px; border-radius: 12px; }
+        .lp-dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding: 18px; align-items: start; }
+        .lp-dash-match { border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px 16px; text-align: center; background: rgba(255,255,255,0.03); }
+        .lp-dash-match .lb { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 12px; }
+        .lp-dash-match .row { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .lp-dash-match .team { font-size: 0.95rem; font-weight: 800; color: #fff; }
+        .lp-dash-match .score { font-size: 1.25rem; font-weight: 900; color: #ffd700; min-width: 84px; text-align: center; }
+        .lp-dash-list { border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 14px 16px; background: rgba(255,255,255,0.03); }
+        .lp-dash-list h4 { font-size: 0.72rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 10px; }
+        .lp-dash-list .li { display: flex; justify-content: space-between; font-size: 0.8rem; color: #e2e8f0; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .lp-dash-list .li span:last-child { color: #ffd700; font-weight: 800; }
+
+        /* ---------- Trust / value strip ---------- */
+        .lp-strip {
+            max-width: 980px; margin: 16px auto 0; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
             background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: var(--radius); padding: 18px; text-align: left;
-            backdrop-filter: blur(6px); margin-bottom: 26px;
+            border-radius: 40px; padding: 10px 24px; backdrop-filter: blur(6px);
         }
-        .lp-feat { display: flex; align-items: flex-start; gap: 9px; font-size: 0.8rem;
-            color: #e2e8f0; font-weight: 600; line-height: 1.4; padding: 5px 0; }
-        .lp-feat .fi { flex-shrink: 0; font-size: 1rem; }
-        .lp-note { font-size: 0.78rem; color: #94a3b8; line-height: 1.6; }
-        .lp-note strong { color: #ffd700; }
-        .lp-live-demo {
-            display: inline-flex; align-items: center; gap: 8px; margin-top: 20px;
-            font-size: 0.8rem; font-weight: 700; color: #cbd5e1;
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
-            padding: 9px 18px; border-radius: 20px; text-decoration: none; transition: 0.2s;
-        }
-        .lp-live-demo:hover { background: rgba(255,255,255,0.12); }
-        .lp-live-demo .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
-            animation: lpBlink 1.6s infinite; display: inline-block; }
-        @keyframes lpBlink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-        @media (max-width: 480px) {
-            .lp-wrap { padding-top: 36px; }
-            #no-competition-page h1 { font-size: 1.5rem; }
-            .lp-logo { width: 68px; height: 68px; font-size: 1.9rem; }
+        .lp-strip .it { font-size: 0.82rem; font-weight: 800; color: #e2e8f0; letter-spacing: 0.5px; }
+        .lp-strip .sep { color: #ffd700; font-weight: 800; }
+
+        /* ---------- Sections ---------- */
+        .lp-section { max-width: 980px; margin: 64px auto 0; position: relative; z-index: 1; }
+        .lp-section.centered { text-align: center; }
+        .lp-tag { display: inline-block; font-size: 0.72rem; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: #94a3b8; margin-bottom: 14px; }
+        .lp-tag.gold { color: #ffd700; }
+        .lp-h2 { font-size: 1.9rem; font-weight: 800; color: #fff; line-height: 1.2; }
+        .lp-h2 .gold { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .lp-sect-p { font-size: 1rem; color: #cbd5e1; max-width: 640px; margin: 18px auto 0; line-height: 1.6; }
+
+        /* ---------- Solution preview cards ---------- */
+        .lp-sol-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; max-width: 980px; }
+        .lp-sol-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); padding: 20px; backdrop-filter: blur(6px); }
+        .lp-sol-card h3 { font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+        .lp-sol-card p { font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; }
+
+        /* ---------- Features ---------- */
+        .lp-feats { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .lp-feat { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); padding: 20px; backdrop-filter: blur(6px); }
+        .lp-feat h3 { font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+        .lp-feat p { font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; }
+
+        /* ---------- How it works ---------- */
+        .lp-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+        .lp-step { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); padding: 18px; text-align: left; backdrop-filter: blur(6px); }
+        .lp-step .n { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--gold-gradient); color: #fff; font-weight: 800; font-size: 0.95rem; margin-bottom: 10px; }
+        .lp-step h3 { font-size: 0.98rem; font-weight: 800; color: #fff; margin-bottom: 6px; }
+        .lp-step p { font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; }
+
+        /* ---------- Why it matters ---------- */
+        .lp-why-quote { font-size: 1.2rem; color: #e2e8f0; max-width: 680px; margin: 18px auto 0; line-height: 1.6; }
+
+        /* ---------- Final CTA ---------- */
+        .lp-final { text-align: center; max-width: 900px; margin: 72px auto 0; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 44px 20px; backdrop-filter: blur(6px); }
+        .lp-final h2 { font-size: 1.8rem; font-weight: 800; color: #fff; }
+        .lp-final p { font-size: 0.9rem; color: #cbd5e1; margin-top: 14px; }
+        .lp-final a.tel { color: #cbd5e1; text-decoration: underline; font-weight: 700; }
+
+        /* ---------- Footer ---------- */
+        .lp-footer { text-align: center; padding: 40px 20px; font-size: 0.82rem; color: #94a3b8; }
+        .lp-footer strong { color: #ffd700; }
+
+        @media (max-width: 720px) {
+            .lp-nav { padding: 12px 14px; }
+            .lp-nav-links { display: none; }
+            .lp-hero { padding-top: 44px; }
+            .lp-hero h1 { font-size: 1.7rem; }
             .lp-cta-row { flex-direction: column; align-items: stretch; }
             .lp-btn { justify-content: center; }
+            .lp-dash-grid, .lp-sol-cards, .lp-feats, .lp-steps { grid-template-columns: 1fr; }
+            .lp-h2 { font-size: 1.45rem; }
+            .lp-strip { border-radius: 20px; padding: 10px 16px; gap: 8px; }
         }
 
         #inactive-container {
@@ -597,25 +661,7 @@
         footer { text-align: center; padding: 32px 20px; font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
         footer a { color: var(--primary); text-decoration: none; font-weight: 700; }
 
-        #no-competition-page {
-            display: none;
-            text-align: center;
-            padding: 120px 20px;
-        }
-        #no-competition-page p {
-            font-size: 1rem;
-            color: var(--text-dark);
-            font-weight: 600;
-            line-height: 1.6;
-        }
-        #no-competition-page a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 700;
-        }
-        #no-competition-page a:hover {
-            text-decoration: underline;
-        }
+        
 
         @media (max-width: 540px) {
             header { padding: 28px 16px 20px; }
@@ -664,35 +710,134 @@
     </header>
 
     <div id="no-competition-page">
-        <div class="lp-wrap">
-            <div class="lp-logo">🏆</div>
-            <div class="lp-brand">Prince Alex Digital</div>
-            <h1><span>Run Your Football Tournament</span><span>Like the Big Leagues</span></h1>
-            <p class="lp-sub">A live tournament hub your fans can follow from anywhere — real-time scores, standings, top scorers and knockout brackets, all updated from one simple admin panel.</p>
+        <!-- ===== Navigation ===== -->
+        <nav class="lp-nav">
+            <a class="lp-nav-brand" href="#lp-live">Prince Alex <span>Digital</span></a>
+            <div class="lp-nav-links">
+                <a href="#lp-live">Live Tournament Hub</a>
+                <a href="#lp-features">Features</a>
+                <a href="#lp-how">How It Works</a>
+                <a href="#lp-organisers">For Organisers</a>
+            </div>
+            <a class="lp-nav-cta" href="https://wa.me/254717384875?text=Hi%20Prince%20Alex%20Digital%2C%20I%20want%20a%20live%20tournament%20hub%20for%20my%20competition">Get Started</a>
+        </nav>
+
+        <!-- ===== Hero ===== -->
+        <div class="lp-hero" id="lp-live">
+            <span class="lp-overline">Live Tournament Hub</span>
+            <h1>Your Tournament Deserves Its Own Digital Stadium.</h1>
+            <p>Live scores. Standings. Fixtures. Top scorers. Knockout brackets.</p>
 
             <div class="lp-cta-row">
-                <a class="lp-btn wa" href="https://wa.me/254717384875?text=Hi%20Prince%20Alex%20Digital%2C%20I%20want%20a%20live%20tournament%20hub%20for%20my%20competition">💬 Get Yours on WhatsApp</a>
-                <a class="lp-btn call" href="tel:+254717384875">📞 0717 384 875</a>
+                <a class="lp-btn wa" href="https://wa.me/254717384875?text=Hi%20Prince%20Alex%20Digital%2C%20I%20want%20a%20live%20tournament%20hub%20for%20my%20competition">Get Your Tournament Live</a>
+                <a class="lp-btn outline" href="https://www.princealex.digital" target="_blank" rel="noopener">View Demo</a>
             </div>
+            <p class="lp-hero-note">Book on WhatsApp or call <a href="tel:+254717384875">0717 384 875</a></p>
 
-            <div class="lp-features">
-                <div class="lp-feat"><span class="fi">🔴</span><span>Live scores with a real match clock — fans watch goals land in real time</span></div>
-                <div class="lp-feat"><span class="fi">📊</span><span>Auto-calculated standings tables for every group, updated instantly</span></div>
-                <div class="lp-feat"><span class="fi">🥇</span><span>Golden Boot race with a winners' podium that updates itself</span></div>
-                <div class="lp-feat"><span class="fi">⚔️</span><span>Knockout bracket generator — top teams seed straight into the cup</span></div>
-                <div class="lp-feat"><span class="fi">🗺️</span><span>Tournament Journey tracker so fans always know the stage</span></div>
-                <div class="lp-feat"><span class="fi">📸</span><span>One-tap sharing: standings as an image, live scores & results to WhatsApp</span></div>
-                <div class="lp-feat"><span class="fi">📱</span><span>Works beautifully on every phone — installable as an app</span></div>
-                <div class="lp-feat"><span class="fi">🛠️</span><span>Simple admin panel: fixtures, results, phases & scorers in minutes</span></div>
+            <div class="lp-dashboard">
+                <div class="lp-dash-head"><span class="t">Live Match Centre</span><span class="lp-live-chip">LIVE</span></div>
+                <div class="lp-dash-grid">
+                    <div class="lp-dash-match">
+                        <div class="lb">Match 21</div>
+                        <div class="row">
+                            <span class="team">Team Alpha</span>
+                            <span class="score">2 - 1</span>
+                            <span class="team">City United</span>
+                        </div>
+                    </div>
+                    <div class="lp-dash-list">
+                        <h4>Top Scorers</h4>
+                        <div class="li"><span>1. K. Otieno</span><span>9</span></div>
+                        <div class="li"><span>2. J. Mwangi</span><span>7</span></div>
+                        <div class="li"><span>3. P. Chebet</span><span>6</span></div>
+                    </div>
+                </div>
             </div>
-
-            <p class="lp-note">Trusted by tournaments across the region.<br>
-            Set up is <strong>fast</strong> — send us your teams and fixtures, and your hub goes live the same day.</p>
-
-            <a class="lp-live-demo" href="https://www.princealex.digital" target="_blank" rel="noopener">
-                <span class="live-dot"></span> See what we build — Prince Alex Digital
-            </a>
         </div>
+
+        <!-- ===== Trust / value strip ===== -->
+        <div class="lp-strip">
+            <span class="it">LIVE SCORES</span><span class="sep">|</span>
+            <span class="it">SMART STANDINGS</span><span class="sep">|</span>
+            <span class="it">TOP SCORERS</span><span class="sep">|</span>
+            <span class="it">KNOCKOUTS</span>
+        </div>
+
+        <!-- ===== The Problem ===== -->
+        <section class="lp-section centered">
+            <span class="lp-tag">The Problem</span>
+            <h2 class="lp-h2">Stop Running Modern Tournaments with WhatsApp Updates and Manual Tables.</h2>
+        </section>
+
+        <!-- ===== The Solution ===== -->
+        <section class="lp-section centered">
+            <span class="lp-tag gold">The Solution</span>
+            <h2 class="lp-h2">Everything Your Tournament Needs, <span class="gold">in One Live Hub.</span></h2>
+            <p class="lp-sect-p">Your own branded dashboard with automatic standings, live scores, top scorers and brackets — always up to date.</p>
+
+            <div class="lp-sol-cards">
+                <div class="lp-sol-card"><h3>Live Match Centre</h3><p>Every game tracked live with a real match clock.</p></div>
+                <div class="lp-sol-card"><h3>Smart Standings</h3><p>Points and tables calculated the moment a result lands.</p></div>
+                <div class="lp-sol-card"><h3>Golden Boot</h3><p>Top scorer race with a podium that updates itself.</p></div>
+            </div>
+        </section>
+
+        <!-- ===== Features ===== -->
+        <section class="lp-section" id="lp-features">
+            <span class="lp-tag">Features</span>
+            <div class="lp-feats">
+                <div class="lp-feat"><h3>Live Match Centre</h3><p>Real-time scores and a match clock so fans watch goals land as they happen.</p></div>
+                <div class="lp-feat"><h3>Smart Standings</h3><p>Auto-calculated group tables and points updated instantly from every result.</p></div>
+                <div class="lp-feat"><h3>Golden Boot</h3><p>Top scorer race with a winners' podium that updates itself.</p></div>
+                <div class="lp-feat"><h3>Fixtures</h3><p>Full fixture list with kickoff dates and times for every match.</p></div>
+                <div class="lp-feat"><h3>Knockout Brackets</h3><p>Top teams seed straight into the cup with generated brackets.</p></div>
+                <div class="lp-feat"><h3>Tournament Statistics</h3><p>Team and player stats, goals, form and progress at a glance.</p></div>
+            </div>
+        </section>
+
+        <!-- ===== For Organisers ===== -->
+        <section class="lp-section centered" id="lp-organisers">
+            <span class="lp-tag">For Organisers</span>
+            <h2 class="lp-h2">One Admin Panel. <span class="gold">Complete Tournament Control.</span></h2>
+            <p class="lp-sect-p">Set fixtures, record results, manage stages and scorers from one simple panel — no technical skills needed.</p>
+        </section>
+
+        <!-- ===== How It Works ===== -->
+        <section class="lp-section" id="lp-how">
+            <span class="lp-tag">How It Works</span>
+            <div class="lp-steps">
+                <div class="lp-step"><span class="n">1</span><h3>Send tournament details</h3><p>Share your teams, fixtures and groups on WhatsApp. That is all we need.</p></div>
+                <div class="lp-step"><span class="n">2</span><h3>We build your hub</h3><p>Your tournament goes live the same day with its own dedicated link.</p></div>
+                <div class="lp-step"><span class="n">3</span><h3>Share your link</h3><p>Fans follow scores and standings from any device.</p></div>
+                <div class="lp-step"><span class="n">4</span><h3>Run your tournament</h3><p>Update results in minutes while the hub stays live.</p></div>
+            </div>
+        </section>
+
+        <!-- ===== Why It Matters ===== -->
+        <section class="lp-section centered">
+            <span class="lp-tag">Why It Matters</span>
+            <p class="lp-why-quote">Your fans don't just want the result. They want to follow the tournament.</p>
+        </section>
+
+        <!-- ===== Mobile Experience ===== -->
+        <section class="lp-section centered">
+            <span class="lp-tag">Mobile Experience</span>
+            <h2 class="lp-h2">Follow every match from any phone.</h2>
+            <p class="lp-sect-p">Fast, clean and fully responsive — your hub feels great on any screen.</p>
+        </section>
+
+        <!-- ===== Final CTA ===== -->
+        <div class="lp-final">
+            <span class="lp-tag gold">Get Started</span>
+            <h2>Ready to Give Your Tournament a Professional Digital Home?</h2>
+            <p>Book on WhatsApp and go live today, or call <a class="tel" href="tel:+254717384875">0717 384 875</a>.</p>
+            <div class="lp-cta-row">
+                <a class="lp-btn wa" href="https://wa.me/254717384875?text=Hi%20Prince%20Alex%20Digital%2C%20I%20want%20a%20live%20tournament%20hub%20for%20my%20competition">Get Your Tournament Live</a>
+            </div>
+        </div>
+
+        <!-- ===== Footer ===== -->
+        <footer class="lp-footer">Powered by <strong>Prince Alex Digital</strong></footer>
     </div>
 
     <div id="inactive-container">
@@ -746,7 +891,7 @@
     </div>
 
     <footer>
-        Engine Platform Maintained by <a href="https://www.princealex.digital" target="_blank">Prince Alex Digital</a>
+        Powered by <a href="https://www.princealex.digital" target="_blank">Prince Alex Digital</a>
     </footer>
 
     <script type="module">
@@ -781,6 +926,7 @@
         if (!competitionId) {
             document.getElementById('no-competition-page').style.display = 'block';
             document.querySelector('header').style.display = 'none';
+            document.querySelector('footer').style.display = 'none';
             document.getElementById('main-content').style.display = 'none';
             document.getElementById('main-content-container').style.display = 'none';
         } else {
@@ -1285,17 +1431,19 @@
             const a = teams.find(t => t.id === m.awayTeam) || { name: 'Away' };
             const { name: gName, md } = groupLabel(m);
             const live = isLiveMatch(m);
+            const finished = !live && isFinishedMatch(m);
+            const scheduled = !live && !finished;
 
-            document.getElementById('detail-title').textContent = live ? '● LIVE' : 'Match Result';
+            document.getElementById('detail-title').textContent = live ? '● LIVE' : (finished ? 'Match Result' : 'Scheduled');
             const metaParts = [gName];
             if (md) metaParts.push(md);
             if (!live) metaParts.push(new Date(m.date).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }));
             document.getElementById('detail-meta').textContent = metaParts.join(' · ');
 
             document.getElementById('detail-home-name').textContent = h.name;
-            document.getElementById('detail-home-goals').textContent = m.homeGoals !== undefined ? m.homeGoals : 0;
+            document.getElementById('detail-home-goals').textContent = finished ? (m.homeGoals !== undefined ? m.homeGoals : 0) : '';
             document.getElementById('detail-away-name').textContent = a.name;
-            document.getElementById('detail-away-goals').textContent = m.awayGoals !== undefined ? m.awayGoals : 0;
+            document.getElementById('detail-away-goals').textContent = finished ? (m.awayGoals !== undefined ? m.awayGoals : 0) : '';
 
             const minuteEl = document.getElementById('detail-minute');
             minuteEl.className = 'detail-minute match-minute';
@@ -1303,18 +1451,26 @@
                 minuteEl.setAttribute('data-match-start', m.date);
                 minuteEl.setAttribute('data-phase', m.phase || '');
                 minuteEl.setAttribute('data-phase-start', m.phaseSetAt || '');
-            } else {
+            } else if (finished) {
                 minuteEl.removeAttribute('data-match-start');
                 minuteEl.removeAttribute('data-phase-start');
                 minuteEl.textContent = 'FT';
+            } else {
+                // Scheduled / upcoming — show the kickoff time instead of an "FT" label.
+                minuteEl.removeAttribute('data-match-start');
+                minuteEl.removeAttribute('data-phase-start');
+                const kd = new Date(m.date);
+                minuteEl.textContent = (isNaN(kd.getTime()))
+                    ? 'Upcoming'
+                    : 'Kickoff ' + kd.toLocaleString([], { hour: '2-digit', minute: '2-digit' });
             }
 
-            renderDetailGoals(m, h, a);
+            renderDetailGoals(m, h, a, scheduled);
             renderDetailInfo(m);
             document.getElementById('match-detail-overlay').classList.add('open');
         };
 
-        function renderDetailGoals(m, h, a) {
+        function renderDetailGoals(m, h, a, scheduled = false) {
             const container = document.getElementById('detail-goals');
             const scorers = (m.scorers && Array.isArray(m.scorers)) ? m.scorers : [];
 
@@ -1357,7 +1513,7 @@
             };
 
             if (scorers.length === 0) {
-                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:10px 0; font-size:0.9rem;">No goals recorded</p>';
+                container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:10px 0; font-size:0.9rem;">' + (scheduled ? 'Match has not been played yet' : 'No goals recorded') + '</p>';
                 return;
             }
 
@@ -1402,13 +1558,15 @@
             
             filteredGroups.sort((a,b) => a.name.localeCompare(b.name)).forEach(group => {
                 const groupTeams = teams.filter(t => t.groupId === group.id).map(t => ({ ...t, P:0, W:0, D:0, L:0, F:0, A:0, GD:0, Pts:0 }));
-                matches.filter(m => m.groupId === group.id && m.played).forEach(m => {
+                matches.filter(m => m.groupId === group.id && (isFinishedMatch(m) || isLiveMatch(m))).forEach(m => {
                     const h = groupTeams.find(t => t.id === m.homeTeam);
                     const a = groupTeams.find(t => t.id === m.awayTeam);
                     if(h && a) {
-                        h.P++; a.P++; h.F += m.homeGoals; h.A += m.awayGoals; a.F += m.awayGoals; a.A += m.homeGoals;
-                        if(m.homeGoals > m.awayGoals) { h.W++; h.Pts+=3; a.L++; }
-                        else if(m.homeGoals < m.awayGoals) { a.W++; a.Pts+=3; h.L++; }
+                        const hg = m.homeGoals !== undefined ? m.homeGoals : 0;
+                        const ag = m.awayGoals !== undefined ? m.awayGoals : 0;
+                        h.P++; a.P++; h.F += hg; h.A += ag; a.F += ag; a.A += hg;
+                        if(hg > ag) { h.W++; h.Pts+=3; a.L++; }
+                        else if(hg < ag) { a.W++; a.Pts+=3; h.L++; }
                         else { h.D++; a.D++; h.Pts++; a.Pts++; }
                     }
                 });
@@ -1517,14 +1675,17 @@
 
             const medal = ['🥇','🥈','🥉'];
             const cls = ['gold','silver','bronze'];
-            // Visual order on the podium: 2nd (left), 1st (center), 3rd (right)
+            // Visual order on the podium: 2nd (left), 1st (center), 3rd (right).
+            // Render each slot by its true rank; empty slots become invisible
+            // placeholders so a small field keeps the champion centered.
             const podiumOrder = [1, 0, 2];
-            const podium = podiumOrder.map(idx => sortedScorers[idx]).filter(Boolean);
-
-            const podiumHtml = `<div class="gb-podium">` + podium.map((s, i) => {
-                const pos = podiumOrder[i];          // actual rank index (0 = 1st)
+            const podiumHtml = `<div class="gb-podium">` + podiumOrder.map(pos => {
+                const s = sortedScorers[pos];
                 const rank = pos + 1;
                 const c = cls[pos] || 'bronze';
+                if (!s) {
+                    return `<div class="gb-podium-item ${c}" aria-hidden="true" style="visibility:hidden;"></div>`;
+                }
                 return `<div class="gb-podium-item ${c}">
                     <div class="gb-top ${c}">
                         <div class="gb-medal">${medal[pos] || rank}</div>
